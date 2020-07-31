@@ -115,7 +115,7 @@ osTimerId osTimerCreate (const osTimerDef_t *timer_def, os_timer_type type, void
   return osTimerNew((osTimerFunc_t)timer_def->ptimer, type, argument, &timer_def->attr);
 }
 #endif
-
+*/
 
 // Mutex
 #if !defined(os1_Disable_Mutex)
@@ -128,7 +128,7 @@ osMutexId osMutexCreate (const osMutexDef_t *mutex_def) {
 }
 #endif
 
-
+/*
 // Semaphore
 
 #if (defined (osFeature_Semaphore) && (osFeature_Semaphore != 0U)) && !defined(os1_Disable_Semaphore)

@@ -1036,6 +1036,7 @@ uint32_t osThreadFlagsWait (uint32_t flags, uint32_t options, uint32_t timeout)
 			if(thread->waitValPresent)
 			{
 				thread_flags = thread->waitExitVal;
+				thread->waitValPresent = false;
 			}
 			else
 			{

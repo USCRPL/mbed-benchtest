@@ -34,13 +34,13 @@ osMutexDef (MutexBas);
 
 /* Definitions for TC_MutexTimeout */
 static void  Th_MutexLock (void const *arg);
-osThreadDef (Th_MutexLock, osPriorityAboveNormal, 1, 0);
+osThreadDef (Th_MutexLock, osPriorityAboveNormal, 0);
 
 osMutexDef (MutexTout);
 
 /* Definitions for TC_MutexNestedAcquire */
 static void  Th_MutexWait (void const *arg);
-osThreadDef (Th_MutexWait, osPriorityAboveNormal, 1, 0);
+osThreadDef (Th_MutexWait, osPriorityAboveNormal, 0);
 
 static void RecursiveMutexAcquire (uint32_t depth, uint32_t ctrl);
 osMutexDef (Mutex_Nest);
@@ -51,9 +51,9 @@ void Th_LowPrioJob    (void const *arg);
 void Th_MediumPrioJob (void const *arg);
 void Th_HighPrioJob   (void const *arg);
 
-osThreadDef (Th_LowPrioJob,     osPriorityBelowNormal,  1, 0);
-osThreadDef (Th_MediumPrioJob,  osPriorityNormal,       1, 0);
-osThreadDef (Th_HighPrioJob,    osPriorityAboveNormal,  1, 0);
+osThreadDef (Th_LowPrioJob,     osPriorityBelowNormal,  0);
+osThreadDef (Th_MediumPrioJob,  osPriorityNormal, 0);
+osThreadDef (Th_HighPrioJob,    osPriorityAboveNormal, 0);
 
 osMutexDef (Mutex_PrioInv);
 
@@ -62,8 +62,8 @@ osMutexDef (Mutex_Ownership);
 
 void Th_MutexAcqLow  (void const *arg);
 void Th_MutexRelHigh (void const *arg);
-osThreadDef (Th_MutexAcqLow,  osPriorityLow,  1, 0);
-osThreadDef (Th_MutexRelHigh, osPriorityHigh, 1, 0);
+osThreadDef (Th_MutexAcqLow,  osPriorityLow, 0);
+osThreadDef (Th_MutexRelHigh, osPriorityHigh, 0);
 
 
 
@@ -548,19 +548,20 @@ void TC_MutexParam (void) {
 \details
 - Call all mutex management functions from the ISR
 */
+/*
 void TC_MutexInterrupts (void) {
   
   TST_IRQHandler = Mutex_IRQHandler;
   
   NVIC_EnableIRQ((IRQn_Type)0);
   
-  Isr.Ex_Num = 0; /* Test: osMutexCreate */
+  Isr.Ex_Num = 0; // Test: osMutexCreate
   NVIC_SetPendingIRQ((IRQn_Type)0);
   ASSERT_TRUE (ISR_MutexId == NULL);
   
-  Isr.Ex_Num = 1; /* Test: osMutexWait */
+  Isr.Ex_Num = 1; // Test: osMutexWait
   
-  /* Create valid mutex, to be used for ISR function calls */
+  // Create valid mutex, to be used for ISR function calls
   ISR_MutexId = osMutexCreate  (osMutex (MutexIsr));
   ASSERT_TRUE (ISR_MutexId != NULL);
   
@@ -579,7 +580,7 @@ void TC_MutexInterrupts (void) {
     // [ILG]
     ISR_OsStat = osOK;
 
-    Isr.Ex_Num = 2; /* Test: osMutexRelease */
+    Isr.Ex_Num = 2; // Test: osMutexRelease
     NVIC_SetPendingIRQ((IRQn_Type)0);
 
     // [ILG]
@@ -590,7 +591,7 @@ void TC_MutexInterrupts (void) {
     // [ILG]
     ISR_OsStat = osOK;
 
-    Isr.Ex_Num = 3; /* Test: osMutexDelete */
+    Isr.Ex_Num = 3; // Test: osMutexDelete
     NVIC_SetPendingIRQ((IRQn_Type)0);
 
     // [ILG]
@@ -598,12 +599,13 @@ void TC_MutexInterrupts (void) {
 
     ASSERT_TRUE (ISR_OsStat == osErrorISR);
     
-    /* Delete mutex */
+    // Delete mutex
     ASSERT_TRUE (osMutexDelete (ISR_MutexId) == osOK);
   }
   
   NVIC_DisableIRQ((IRQn_Type)0);
 }
+*/
 
 /**
 @}

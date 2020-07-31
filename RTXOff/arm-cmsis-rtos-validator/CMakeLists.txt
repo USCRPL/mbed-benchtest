@@ -1,6 +1,7 @@
 set(CMSIS_RTOS_VALIDATOR_SOURCES
 	Source/cmsis_rv.c
 	Source/RV_Thread.c
+	#Source/RV_Mutex.c
 	Source/RV_Report.c
 	Source/RV_Framework.c)
 
