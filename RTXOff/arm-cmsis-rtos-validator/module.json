@@ -1,0 +1,25 @@
+{
+	"name": "ilg-arm-cmsis-rtos-validator",
+	"description": "An xPack with a selection of ARM CMSIS RTOS Validator files.",
+	"version": "1.0.0-1",
+	"keywords": [
+		"arm",
+		"cmsis",
+		"rtos",
+		"validator",
+		"test",
+		"xpack",
+		"xcdl"
+	],
+	"author": "Liviu Ionescu <ilg@livius.net>",
+	"homepage": "https://github.com/xpacks/arm-cmsis-rtos-validator",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/xpacks/arm-cmsis-rtos-validator.git"
+	},
+	"bugs": {
+		"url": "https://github.com/xpacks/arm-cmsis-rtos-validator/issues"
+	},
+	"license": "LicenseRef-LICENSE.pdf",
+	"dependencies": {}
+}

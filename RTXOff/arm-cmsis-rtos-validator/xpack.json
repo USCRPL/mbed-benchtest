@@ -1,0 +1,59 @@
+{
+	"$schema": "http://xcdl.github.io/schemas/xpack-1-1.json",
+	"name": "ilg-arm-cmsis-rtos-validator",
+	"title": "ARM CMSIS RTOS Validator",
+	"description": "An xPack with a selection of ARM CMSIS RTOS Validator files.",
+	"xcdlFile": ".xcdl.json",
+	"repository": 
+	{
+		"type": "git",
+		"url": "https://github.com/xpacks/arm-cmsis-rtos-validator.git",
+		"archive": "https://github.com/xpacks/arm-cmsis-rtos-validator/archive/xpack.zip"
+	},
+
+	"version": "1.0.0-1",
+	"releases": [
+		
+	],
+
+	"keywords": [
+		"arm",
+		"cmsis",
+		"rtos",
+		"validator",
+		"test"
+	],
+
+	"homepage": "https://github.com/xpacks/arm-cmsis-rtos-validator",
+	"support": [
+		{
+			"description": "all issues",
+			"url": "https://github.com/xpacks/arm-cmsis-rtos-validator/issues"
+		}
+	],
+
+	"license": "LicenseRef-LICENSE.pdf",
+	"maintainers": [
+		{
+			"name": "Liviu Ionescu",
+			"email": "ilg@livius.net",
+			"url": "http://liviusdotnet.worldpress.com"
+		}
+	],
+
+	"contributors": [
+		{
+			"name": "ARM"
+		},
+
+		{
+			"name": "Liviu Ionescu",
+			"email": "ilg@livius.net",
+			"url": "http://liviusdotnet.worldpress.com"
+		}
+	],
+
+	"dependencies": [
+		
+	]
+}

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<package schemaVersion="1.3" xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocation="PACK.xsd">
+  <vendor>ARM</vendor>
+  <name>CMSIS-RTOS_Validation</name>
+  <description>CMSIS-RTOS Validation</description>
+  <url>http://www.keil.com/pack</url>
+  <supportContact>http://silver.arm.com/support</supportContact>
+  
+  <releases>
+    <release version="1.0.0" date="2016-02-17">
+      Initial public release of the CMSIS-RTOS Validation Suite
+    </release>
+  </releases>
+
+  <keywords>
+    <keyword>ARM</keyword>
+    <keyword>CMSIS-RTOS</keyword>
+    <keyword>RTOS validation</keyword>
+  </keywords>
+
+  <taxonomy>
+    <description Cclass="CMSIS RTOS Validation" doc="Documents/RV/html/index.html">CMSIS-RTOS Validation Suite</description>
+  </taxonomy>  
+  
+  <examples>
+    <example name="CMSIS-RTOS Validation" doc="Abstract.txt" folder="Examples/ARMCM3/CMSIS_RV">
+      <description>CMSIS-RTOS Validation Example</description>
+      <board name="uVision Simulator" vendor="Keil"/>
+      <project>
+        <environment name="uv" load="CMSIS_RV.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="Device" Cgroup="Startup"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+      </attributes>
+    </example>  
+  </examples>
+
+  
+  <conditions>
+  
+    <condition id="Cortex-M Device">
+      <description>Cortex-M processor based device: one of CM3, CM4, CM7 </description>
+      <accept Dcore="Cortex-M3"/>
+      <accept Dcore="Cortex-M4"/>
+      <accept Dcore="Cortex-M7"/>
+    </condition>
+  
+    <condition id="CMSIS Core with RTOS and STDOUT">
+      <description>CMSIS Core with RTOS for Cortex-M processor</description>
+      <accept condition="Cortex-M Device"/>
+      <require Cclass="CMSIS" Cgroup="CORE"/>
+      <require Cclass="CMSIS" Cgroup="RTOS"/>
+      <require Cclass="Compiler" Cgroup="I/O" Csub="STDOUT"/>
+    </condition>
+
+    <condition id="CMSIS RTOS Validation Framework">
+      <description>CMSIS RTOS Validation Framework</description>
+      <require condition="CMSIS Core with RTOS and STDOUT"/>
+      <require Cclass="CMSIS RTOS Validation" Cgroup="Framework"/>
+    </condition>
+  
+  </conditions>  
+
+  <components>
+    
+    <component Cgroup="Framework" Cclass="CMSIS RTOS Validation" Cversion="1.0.0" condition="CMSIS Core with RTOS and STDOUT">
+      <description>Test framework</description>
+      <files>
+        <!--file category="doc"     name="Documents/RV/html/index.html" /-->
+        <file category="include" name="Include/"/>
+        <file category="header"  name="Source/Config/RV_Config.h" attr="config" version = "1.0.1"/>
+        <file category="source"  name="Source/cmsis_rv.c"/>
+        <file category="header"  name="Include/cmsis_rv.h"/>
+        <file category="source"  name="Source/RV_Framework.c"/>
+        <file category="source"  name="Source/RV_Report.c"/>
+      </files>
+    </component>
+    
+    <component Cgroup="Thread" Cclass="CMSIS RTOS Validation" Cversion="1.0.0" condition="CMSIS RTOS Validation Framework">        
+      <description>Thread test</description>
+      <RTE_Components_h>
+        #define RTE_RV_THREAD                      /* RTOS Validation - Thread test enabled */
+      </RTE_Components_h>
+      <files>
+        <file category="source" name="Source/RV_Thread.c"/>
+      </files>
+    </component>
+    
+    <component Cgroup="GenWait" Cclass="CMSIS RTOS Validation" Cversion="1.0.0" condition="CMSIS RTOS Validation Framework">
+      <description>GenWait test</description>
+      <RTE_Components_h>
+        #define RTE_RV_GENWAIT                     /* RTOS Validation - GenWait test enabled */
+      </RTE_Components_h>
+      <files>
+        <file category="source" name="Source/RV_GenWait.c"/>
+      </files>
+    </component>
+    
+    <component Cgroup="Timer" Cclass="CMSIS RTOS Validation" Cversion="1.0.0" condition="CMSIS RTOS Validation Framework">
+      <description>Timer test</description>
+      <RTE_Components_h>
+        #define RTE_RV_TIMER                       /* RTOS Validation - Timer test enabled */
+      </RTE_Components_h>
+      <files>
+        <file category="source" name="Source/RV_Timer.c"/>
+      </files>
+    </component>
+    
+    <component Cgroup="Signal" Cclass="CMSIS RTOS Validation" Cversion="1.0.0" condition="CMSIS RTOS Validation Framework">
+      <description>Signal test</description>
+      <RTE_Components_h>
+        #define RTE_RV_SIGNAL                      /* RTOS Validation - Signal test enabled */
+      </RTE_Components_h>
+      <files>
+        <file category="source" name="Source/RV_Signal.c"/>
+      </files>
+    </component>
+    
+    <component Cgroup="Mutex" Cclass="CMSIS RTOS Validation" Cversion="1.0.0" condition="CMSIS RTOS Validation Framework">
+      <description>Mutex test</description>
+      <RTE_Components_h>
+        #define RTE_RV_MUTEX                       /* RTOS Validation - Mutex test enabled */
+      </RTE_Components_h>
+      <files>
+        <file category="source" name="Source/RV_Mutex.c"/>
+      </files>
+    </component>
+    
+    <component Cgroup="Semaphore" Cclass="CMSIS RTOS Validation" Cversion="1.0.0" condition="CMSIS RTOS Validation Framework">
+      <description>Semaphore test</description>
+      <RTE_Components_h>
+        #define RTE_RV_SEMAPHORE                   /* RTOS Validation - Semaphore test enabled */
+      </RTE_Components_h>
+      <files>
+        <file category="source" name="Source/RV_Semaphore.c"/>
+      </files>
+    </component>
+    
+    <component Cgroup="MemoryPool" Cclass="CMSIS RTOS Validation" Cversion="1.0.0" condition="CMSIS RTOS Validation Framework">
+      <description>MemoryPool test</description>
+      <RTE_Components_h>
+        #define RTE_RV_MEMORYPOOL                  /* RTOS Validation - MemoryPool test enabled */
+      </RTE_Components_h>
+      <files>
+        <file category="source" name="Source/RV_MemoryPool.c"/>
+      </files>
+    </component>
+    
+    <component Cgroup="MsgQueue" Cclass="CMSIS RTOS Validation" Cversion="1.0.0" condition="CMSIS RTOS Validation Framework">
+      <description>MsgQueue test</description>
+      <RTE_Components_h>
+        #define RTE_RV_MSGQUEUE                    /* RTOS Validation - MsgQueue test enabled */
+      </RTE_Components_h>
+      <files>
+        <file category="source" name="Source/RV_MsgQueue.c"/>
+      </files>
+    </component>
+    
+    <component Cgroup="MailQueue" Cclass="CMSIS RTOS Validation" Cversion="1.0.0" condition="CMSIS RTOS Validation Framework">
+      <description>MailQueue test</description>
+      <RTE_Components_h>
+        #define RTE_RV_MAILQUEUE                   /* RTOS Validation - MailQueue test enabled */
+      </RTE_Components_h>
+      <files>
+        <file category="source" name="Source/RV_MailQueue.c"/>
+      </files>
+    </component>
+    
+    <component Cgroup="WaitFunc" Cclass="CMSIS RTOS Validation" Cversion="1.0.0" condition="CMSIS RTOS Validation Framework">
+      <description>WaitFunc test</description>
+      <RTE_Components_h>
+        #define RTE_RV_WAITFUNC                    /* RTOS Validation - WaitFunc test enabled */
+      </RTE_Components_h>
+      <files>
+        <file category="source" name="Source/RV_WaitFunc.c"/>
+      </files>
+    </component>
+    
+  </components> <!-- end of components sections -->
+</package>

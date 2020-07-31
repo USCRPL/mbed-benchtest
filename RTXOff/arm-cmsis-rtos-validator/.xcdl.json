@@ -1,0 +1,8 @@
+{
+	"$schema": "http://xcdl.github.io/schemas/xcdl-1-1.json",
+	"name": "/ilg/arm/cmsis/rtos-validator",
+	"description": "CMSIS RTOS Validator.",
+	"nodes": [
+		
+	]
+}
