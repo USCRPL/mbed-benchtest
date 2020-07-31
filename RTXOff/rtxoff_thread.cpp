@@ -294,6 +294,27 @@ bool osRtxThreadWaitEnter (uint8_t state, uint32_t timeout) {
 	return true;
 }
 
+/*
+ * Helper function and struct for starting threads.
+ * Assembly code in RTX causes threads to call osThreadExit() after they return from their main functions.
+ * RTXOff cannot do this so we use this helper function to call osThreadExit()
+ */
+struct ThreadStartData
+{
+	osThreadFunc_t func;
+	void *argument;
+};
+
+void startThreadHelper(ThreadStartData * startData)
+{
+	// delete struct now in case func never returns
+	ThreadStartData startDataCopy(*startData);
+	delete startData;
+
+	startDataCopy.func(startDataCopy.argument);
+	osThreadExit();
+}
+
 osThreadId_t osThreadNew (osThreadFunc_t func, void *argument, const osThreadAttr_t *attr)
 {
 	if (func == NULL) {
@@ -359,12 +380,17 @@ osThreadId_t osThreadNew (osThreadFunc_t func, void *argument, const osThreadAtt
 	thread->mutex_list    = NULL;
 	thread->waitValPresent = 0;
 
+	// create helper struct
+	ThreadStartData * startData = new ThreadStartData();
+	startData->func = func;
+	startData->argument = argument;
+
 	// Create OS thread
 #if USE_WINTHREAD
 	thread->osThread = CreateThread(nullptr,
 			0,
-			reinterpret_cast<LPTHREAD_START_ROUTINE>(func),
-			argument,
+			reinterpret_cast<LPTHREAD_START_ROUTINE>(&startThreadHelper),
+			reinterpret_cast<void*>(startData),
 			CREATE_SUSPENDED,
 			nullptr);
 

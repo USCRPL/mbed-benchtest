@@ -46,8 +46,6 @@ void ThreadDispatcher::dispatchForever()
 		if(exitCode != STILL_ACTIVE)
 		{
 			std::cerr << "RTXOff Sanity Check Failure: thread " << thread.run.curr->name << " has finished execution but is still active according to RTX scheduler." << std::endl;
-			std::cerr << "Make sure that all threads call osThreadExit() instead of simply returning from their main functions." << std::endl;
-			exit(7);
 		}
 
 		// Dispatch the current thread

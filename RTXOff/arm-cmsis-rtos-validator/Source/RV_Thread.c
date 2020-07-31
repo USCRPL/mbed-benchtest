@@ -21,14 +21,14 @@ osThreadDef (Th_CountingThread, osPriorityNormal, 0);
 /* Definitions for TC_ThreadCreate */
 uint32_t Var_ThreadExec;
 
-void Th_Thr0 (void const *arg) { Var_ThreadExec += (arg == NULL) ? (1) : (2); osThreadExit(); }
-void Th_Thr1 (void const *arg) { Var_ThreadExec += (arg == NULL) ? (1) : (2); osThreadExit(); }
-void Th_Thr2 (void const *arg) { Var_ThreadExec += (arg == NULL) ? (1) : (2); osThreadExit(); }
-void Th_Thr3 (void const *arg) { Var_ThreadExec += (arg == NULL) ? (1) : (2); osThreadExit(); }
-void Th_Thr4 (void const *arg) { Var_ThreadExec += (arg == NULL) ? (1) : (2); osThreadExit(); }
-void Th_Thr5 (void const *arg) { Var_ThreadExec += (arg == NULL) ? (1) : (2); osThreadExit(); }
-void Th_Thr6 (void const *arg) { Var_ThreadExec += (arg == NULL) ? (1) : (2); osThreadExit(); }
-void Th_Thr7 (void const *arg) { Var_ThreadExec += (arg == NULL) ? (1) : (2); osThreadExit(); }
+void Th_Thr0 (void const *arg) { Var_ThreadExec += (arg == NULL) ? (1) : (2); }
+void Th_Thr1 (void const *arg) { Var_ThreadExec += (arg == NULL) ? (1) : (2); }
+void Th_Thr2 (void const *arg) { Var_ThreadExec += (arg == NULL) ? (1) : (2); }
+void Th_Thr3 (void const *arg) { Var_ThreadExec += (arg == NULL) ? (1) : (2); }
+void Th_Thr4 (void const *arg) { Var_ThreadExec += (arg == NULL) ? (1) : (2); }
+void Th_Thr5 (void const *arg) { Var_ThreadExec += (arg == NULL) ? (1) : (2); }
+void Th_Thr6 (void const *arg) { Var_ThreadExec += (arg == NULL) ? (1) : (2); }
+void Th_Thr7 (void const *arg) { Var_ThreadExec += (arg == NULL) ? (1) : (2); }
 
 void Th_Run  (void const *arg) { while(1) { osThreadYield(); } }
 void Th_isr  (void const *arg) { while(1) {;}                  }
@@ -54,13 +54,13 @@ osThreadDef (Th_MultiInst, osPriorityNormal, 0);
 /* Definitions for TC_ThreadGetId */
 #define GETID_THR_CNT 7
 
-void Th_GetId0 (void const *arg) { osThreadId *p = (osThreadId *)arg; *p = osThreadGetId(); osThreadExit(); }
-void Th_GetId1 (void const *arg) { osThreadId *p = (osThreadId *)arg; *p = osThreadGetId(); osThreadExit(); }
-void Th_GetId2 (void const *arg) { osThreadId *p = (osThreadId *)arg; *p = osThreadGetId(); osThreadExit(); }
-void Th_GetId3 (void const *arg) { osThreadId *p = (osThreadId *)arg; *p = osThreadGetId(); osThreadExit(); }
-void Th_GetId4 (void const *arg) { osThreadId *p = (osThreadId *)arg; *p = osThreadGetId(); osThreadExit(); }
-void Th_GetId5 (void const *arg) { osThreadId *p = (osThreadId *)arg; *p = osThreadGetId(); osThreadExit(); }
-void Th_GetId6 (void const *arg) { osThreadId *p = (osThreadId *)arg; *p = osThreadGetId(); osThreadExit(); }
+void Th_GetId0 (void const *arg) { osThreadId *p = (osThreadId *)arg; *p = osThreadGetId(); }
+void Th_GetId1 (void const *arg) { osThreadId *p = (osThreadId *)arg; *p = osThreadGetId(); }
+void Th_GetId2 (void const *arg) { osThreadId *p = (osThreadId *)arg; *p = osThreadGetId(); }
+void Th_GetId3 (void const *arg) { osThreadId *p = (osThreadId *)arg; *p = osThreadGetId(); }
+void Th_GetId4 (void const *arg) { osThreadId *p = (osThreadId *)arg; *p = osThreadGetId(); }
+void Th_GetId5 (void const *arg) { osThreadId *p = (osThreadId *)arg; *p = osThreadGetId(); }
+void Th_GetId6 (void const *arg) { osThreadId *p = (osThreadId *)arg; *p = osThreadGetId(); }
 
 osThreadDef (Th_GetId0, osPriorityBelowNormal, 0);
 osThreadDef (Th_GetId1, osPriorityBelowNormal, 0);
@@ -145,7 +145,6 @@ void Th_MultiInst (void const *arg) {
   // Allow the thread to live a little longer, otherwise its
   // definition will be immediately reused.
   osDelay(10);
-  osThreadExit();
 }
 
 
@@ -160,7 +159,6 @@ void Th_PrioExec (void const *arg) {
       break;
     }
   }
-  osThreadExit();
 }
 
 /*-----------------------------------------------------------------------------
@@ -173,8 +171,6 @@ void Th_Child_0 (void const *arg) {
 
   // [ILG]
   osDelay(40);
-
-  osThreadExit();
 }
 void Th_Child_1 (void const *arg) {
   uint32_t *arr = (uint32_t *)arg;
@@ -183,8 +179,6 @@ void Th_Child_1 (void const *arg) {
 
   // [ILG]
   osDelay(30);
-
-  osThreadExit();
 }
 void Th_Child_2 (void const *arg) {
   uint32_t *arr = (uint32_t *)arg;
@@ -194,13 +188,11 @@ void Th_Child_2 (void const *arg) {
   // [ILG]
   osDelay(20);
 
-  osThreadExit();
 }
 void Th_Child_3 (void const *arg) {
   uint32_t *arr = (uint32_t *)arg;
   arr[0] = 4;
 
-  osThreadExit();
 }
 
 /*-----------------------------------------------------------------------------
@@ -215,7 +207,6 @@ void Th_YieldTest (void const *arg) {
   
   cfg->Res = i;
 
-  osThreadExit();
 }
 
 /*-----------------------------------------------------------------------------
