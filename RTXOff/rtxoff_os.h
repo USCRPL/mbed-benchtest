@@ -349,7 +349,7 @@ extern osRtxObjectMemUsage_t osRtxMessageQueueMemUsage;
 extern uint32_t osRtxErrorNotify (uint32_t code, void *object_id);
  
 /// OS Idle Thread
-extern void osRtxIdleThread (void *argument);
+extern __NO_RETURN void osRtxIdleThread (void *argument);
  
 /// OS Exception handlers
 extern void SVC_Handler     (void);

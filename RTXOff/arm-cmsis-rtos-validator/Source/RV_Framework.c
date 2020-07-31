@@ -99,7 +99,7 @@ cmsis_rv (void) {
   return test_report.failed ? 1 : 0;
 }
 
-int mbed_start()
+int mbed_start(void)
 {
 	cmsis_rv();
 	osThreadExit();

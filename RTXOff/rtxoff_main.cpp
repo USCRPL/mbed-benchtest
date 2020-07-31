@@ -20,7 +20,7 @@ int main(void)
 	_main_thread_attr.priority = osPriorityNormal;
 	_main_thread_attr.name = "main";
 
-	osThreadId_t result = osThreadNew((osThreadFunc_t)mbed_start, NULL, &_main_thread_attr);
+	osThreadId_t result = osThreadNew(reinterpret_cast<osThreadFunc_t>(&mbed_start), NULL, &_main_thread_attr);
 	if ((void *)result == nullptr) {
 		std::cerr << "Pre main thread not created" << std::endl;
 	}
