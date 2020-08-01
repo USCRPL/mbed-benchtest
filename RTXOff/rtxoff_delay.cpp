@@ -5,6 +5,11 @@
 /// Wait for Timeout (Time Delay).
 osStatus_t osDelay (uint32_t ticks)
 {
+	if (IsIrqMode() || IsIrqMasked())
+	{
+		return osErrorISR;
+	}
+
 	ThreadDispatcher::Mutex mutex;
 
 	if (ticks != 0U) {
@@ -21,6 +26,11 @@ osStatus_t osDelay (uint32_t ticks)
 /// Wait until specified time.
 osStatus_t osDelayUntil (uint32_t ticks)
 {
+	if (IsIrqMode() || IsIrqMasked())
+	{
+		return osErrorISR;
+	}
+
 	ThreadDispatcher::Mutex mutex;
 
 	ticks -= ThreadDispatcher::instance().kernel.tick;

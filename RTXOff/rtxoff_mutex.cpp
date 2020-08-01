@@ -80,6 +80,11 @@ void osRtxMutexOwnerRestore (const osRtxMutex_t *mutex, const osRtxThread_t *thr
 /// Create and Initialize a Mutex object.
 osMutexId_t osMutexNew (const osMutexAttr_t *attr)
 {
+	if (IsIrqMode() || IsIrqMasked())
+	{
+		return nullptr;
+	}
+
 	osRtxMutex_t *mutex = nullptr;
 	uint32_t    attr_bits;
 	uint8_t     flags = 0;
@@ -117,6 +122,11 @@ osMutexId_t osMutexNew (const osMutexAttr_t *attr)
 /// Get name of a Mutex object.
 const char *osMutexGetName (osMutexId_t mutex_id)
 {
+	if (IsIrqMode() || IsIrqMasked())
+	{
+		return nullptr;
+	}
+
 	osRtxMutex_t *mutex = reinterpret_cast<osRtxMutex_t *>(mutex_id);
 
 	// Check parameters
@@ -130,6 +140,11 @@ const char *osMutexGetName (osMutexId_t mutex_id)
 /// Acquire a Mutex or timeout if it is locked.
 osStatus_t osMutexAcquire (osMutexId_t mutex_id, uint32_t timeout)
 {
+	if (IsIrqMode() || IsIrqMasked())
+	{
+		return osErrorISR;
+	}
+
 	ThreadDispatcher::Mutex dispMutex;
 	osRtxMutex_t *mutex = reinterpret_cast<osRtxMutex_t *>(mutex_id);
 	osRtxThread_t *thread;
@@ -213,6 +228,11 @@ osStatus_t osMutexAcquire (osMutexId_t mutex_id, uint32_t timeout)
 /// Release a Mutex that was acquired by \ref osMutexAcquire.
 osStatus_t osMutexRelease (osMutexId_t mutex_id)
 {
+	if (IsIrqMode() || IsIrqMasked())
+	{
+		return osErrorISR;
+	}
+
 	ThreadDispatcher::Mutex dispMutex;
 	osRtxMutex_t *mutex = reinterpret_cast<osRtxMutex_t *>(mutex_id);
 	const osRtxMutex_t  *mutex0;
@@ -303,6 +323,11 @@ osStatus_t osMutexRelease (osMutexId_t mutex_id)
 /// Get Thread which owns a Mutex object.
 osThreadId_t osMutexGetOwner (osMutexId_t mutex_id)
 {
+	if (IsIrqMode() || IsIrqMasked())
+	{
+		return nullptr;
+	}
+
 	ThreadDispatcher::Mutex dispMutex;
 	osRtxMutex_t *mutex = reinterpret_cast<osRtxMutex_t *>(mutex_id);
 
@@ -322,6 +347,11 @@ osThreadId_t osMutexGetOwner (osMutexId_t mutex_id)
 /// Delete a Mutex object.
 osStatus_t osMutexDelete (osMutexId_t mutex_id)
 {
+	if (IsIrqMode() || IsIrqMasked())
+	{
+		return osErrorISR;
+	}
+
 	ThreadDispatcher::Mutex dispMutex;
 	osRtxMutex_t *mutex = reinterpret_cast<osRtxMutex_t *>(mutex_id);
 

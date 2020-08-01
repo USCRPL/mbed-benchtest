@@ -11,6 +11,11 @@
 /// Initialize the RTOS Kernel.
 osStatus_t osKernelInitialize (void)
 {
+	if (IsIrqMode() || IsIrqMasked())
+	{
+		return osErrorISR;
+	}
+
 	ThreadDispatcher::Mutex mutex;
 
 	if (ThreadDispatcher::instance().kernel.state == osRtxKernelReady) {
@@ -25,6 +30,35 @@ osStatus_t osKernelInitialize (void)
 	return osOK;
 }
 
+///  Get RTOS Kernel Information.
+osStatus_t osKernelGetInfo (osVersion_t *version, char *id_buf, uint32_t id_size)
+{
+	uint32_t size;
+
+	if (version != NULL) {
+		version->api    = osRtxVersionAPI;
+		version->kernel = osRtxVersionKernel;
+	}
+
+	if ((id_buf != NULL) && (id_size != 0U)) {
+		if (id_size > sizeof(osRtxKernelId)) {
+			size = sizeof(osRtxKernelId);
+		} else {
+			size = id_size;
+		}
+		memcpy(id_buf, osRtxKernelId, size);
+	}
+
+	return osOK;
+}
+
+/// Get the current RTOS Kernel state.
+osKernelState_t osKernelGetState (void)
+{
+	ThreadDispatcher::Mutex mutex;
+	return static_cast<osKernelState_t>(ThreadDispatcher::instance().kernel.state);
+}
+
 __NO_RETURN void osRtxIdleThread(void *argument)
 {
 	while(true)
@@ -34,6 +68,11 @@ __NO_RETURN void osRtxIdleThread(void *argument)
 /// Start the RTOS Kernel scheduler.
 osStatus_t osKernelStart (void)
 {
+	if (IsIrqMode() || IsIrqMasked())
+	{
+		return osErrorISR;
+	}
+
 	// don't use a Mutex object since we're calling into dispatchForever()
 	ThreadDispatcher::instance().lockMutex();
 
