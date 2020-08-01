@@ -321,6 +321,11 @@ osThreadId_t osThreadNew (osThreadFunc_t func, void *argument, const osThreadAtt
 		return NULL;
 	}
 
+	if (IsIrqMode() || IsIrqMasked())
+	{
+		return nullptr;
+	}
+
 	ThreadDispatcher::Mutex mutex;
 
 	osRtxThread_t * callingThread = ThreadDispatcher::instance().thread.run.curr;
@@ -430,6 +435,11 @@ const char *osThreadGetName (osThreadId_t thread_id)
 {
 	osRtxThread_t *thread = reinterpret_cast<osRtxThread_t *>(thread_id);
 
+	if (IsIrqMode() || IsIrqMasked())
+	{
+		return nullptr;
+	}
+
 	// Check parameters
 	if ((thread == nullptr) || (thread->id != osRtxIdThread)) {
 		return nullptr;
@@ -440,13 +450,19 @@ const char *osThreadGetName (osThreadId_t thread_id)
 /// Return the thread ID of the current running thread.
 osThreadId_t osThreadGetId()
 {
+	osThreadId_t thread_id;
 	ThreadDispatcher::Mutex mutex;
+
 	return reinterpret_cast<osThreadId_t>(ThreadDispatcher::instance().thread.run.curr);
 }
 
 /// Get current thread state of a thread.
 osThreadState_t osThreadGetState(osThreadId_t thread_id)
 {
+	if (IsIrqMode() || IsIrqMasked()) {
+		return osThreadError;
+	}
+
 	osRtxThread_t *thread = reinterpret_cast<osRtxThread_t *>(thread_id);
 
 	// Check parameters
@@ -459,6 +475,11 @@ osThreadState_t osThreadGetState(osThreadId_t thread_id)
 /// Change priority of a thread.
 osStatus_t osThreadSetPriority (osThreadId_t thread_id, osPriority_t priority)
 {
+	if (IsIrqMode() || IsIrqMasked())
+	{
+		return osErrorISR;
+	}
+
 	ThreadDispatcher::Mutex mutex;
 
 	osRtxThread_t *thread = reinterpret_cast<osRtxThread_t *>(thread_id);
@@ -499,6 +520,10 @@ osStatus_t osThreadSetPriority (osThreadId_t thread_id, osPriority_t priority)
 /// Get current priority of a thread.
 osPriority_t osThreadGetPriority (osThreadId_t thread_id)
 {
+	if (IsIrqMode() || IsIrqMasked()) {
+		return osPriorityError;
+	}
+
 	ThreadDispatcher::Mutex mutex;
 
 	osRtxThread_t *thread = reinterpret_cast<osRtxThread_t *>(thread_id);
@@ -517,7 +542,13 @@ osPriority_t osThreadGetPriority (osThreadId_t thread_id)
 }
 
 /// Pass control to next thread that is in state READY.
-osStatus_t osThreadYield (void) {
+osStatus_t osThreadYield (void)
+{
+	if (IsIrqMode() || IsIrqMasked())
+	{
+		return osErrorISR;
+	}
+
 	ThreadDispatcher::Mutex mutex;
 
 	osRtxThread_t *thread_running;
@@ -542,6 +573,11 @@ osStatus_t osThreadYield (void) {
 /// Suspend execution of a thread.
 osStatus_t osThreadSuspend (osThreadId_t thread_id)
 {
+	if (IsIrqMode() || IsIrqMasked())
+	{
+		return osErrorISR;
+	}
+
 	ThreadDispatcher::Mutex mutex;
 	osRtxThread_t *thread = reinterpret_cast<osRtxThread_t *>(thread_id);
 	osStatus_t   status;
@@ -604,6 +640,11 @@ osStatus_t osThreadSuspend (osThreadId_t thread_id)
 /// Detach a thread (thread storage can be reclaimed when thread terminates).
 osStatus_t osThreadDetach (osThreadId_t thread_id)
 {
+	if (IsIrqMode() || IsIrqMasked())
+	{
+		return osErrorISR;
+	}
+
 	ThreadDispatcher::Mutex mutex;
 	osRtxThread_t *thread = reinterpret_cast<osRtxThread_t *>(thread_id);
 
@@ -630,6 +671,11 @@ osStatus_t osThreadDetach (osThreadId_t thread_id)
 /// Wait for specified thread to terminate.
 osStatus_t osThreadJoin (osThreadId_t thread_id)
 {
+	if (IsIrqMode() || IsIrqMasked())
+	{
+		return osErrorISR;
+	}
+
 	ThreadDispatcher::Mutex mutex;
 	osRtxThread_t *thread = reinterpret_cast<osRtxThread_t *>(thread_id);
 	osStatus_t   status;
@@ -673,6 +719,12 @@ osStatus_t osThreadJoin (osThreadId_t thread_id)
 /// Terminate execution of current running thread.
 __NO_RETURN void osThreadExit (void)
 {
+	if (IsIrqMode() || IsIrqMasked())
+	{
+		// can't return an error code...
+		for (;;) {}
+	}
+
 	ThreadDispatcher::instance().lockMutex();
 
 	osRtxThread_t *thread;
@@ -736,6 +788,11 @@ __NO_RETURN void osThreadExit (void)
 /// Terminate execution of a thread.
 osStatus_t osThreadTerminate (osThreadId_t thread_id)
 {
+	if (IsIrqMode() || IsIrqMasked())
+	{
+		return osErrorISR;
+	}
+
 	ThreadDispatcher::instance().lockMutex();
 	osRtxThread_t *thread = reinterpret_cast<osRtxThread_t *>(thread_id);
 
@@ -846,6 +903,11 @@ osStatus_t osThreadTerminate (osThreadId_t thread_id)
 /// Get number of active threads.
 uint32_t osThreadGetCount (void)
 {
+	if (IsIrqMode() || IsIrqMasked())
+	{
+		return 0;
+	}
+
 	ThreadDispatcher::Mutex mutex;
 	const osRtxThread_t *thread;
 	uint32_t count;
@@ -880,6 +942,11 @@ uint32_t osThreadGetCount (void)
 /// Enumerate active threads.
 uint32_t osThreadEnumerate (osThreadId_t *thread_array, uint32_t array_items)
 {
+	if (IsIrqMode() || IsIrqMasked())
+	{
+		return 0;
+	}
+
 	ThreadDispatcher::Mutex mutex;
 	osRtxThread_t *thread;
 	uint32_t     count;
@@ -922,7 +989,8 @@ uint32_t osThreadEnumerate (osThreadId_t *thread_array, uint32_t array_items)
 }
 
 /// Set the specified Thread Flags of a thread.
-uint32_t osThreadFlagsSet (osThreadId_t thread_id, uint32_t flags) {
+uint32_t osThreadFlagsSet (osThreadId_t thread_id, uint32_t flags)
+{
 	ThreadDispatcher::Mutex mutex;
 	osRtxThread_t *thread = reinterpret_cast<osRtxThread_t *>(thread_id);
 
@@ -943,16 +1011,25 @@ uint32_t osThreadFlagsSet (osThreadId_t thread_id, uint32_t flags) {
 	// Set Thread Flags
 	thread_flags = ThreadFlagsSet(thread, flags);
 
-	// Check if Thread is waiting for Thread Flags
-	if (thread->state == osRtxThreadWaitingThreadFlags) {
-		thread_flags0 = ThreadFlagsCheck(thread, thread->wait_flags, thread->flags_options);
-		if (thread_flags0 != 0U) {
-			if ((thread->flags_options & osFlagsNoClear) == 0U) {
-				thread_flags = thread_flags0 & ~thread->wait_flags;
-			} else {
-				thread_flags = thread_flags0;
+	if (IsIrqMode() || IsIrqMasked())
+	{
+		// flag thread flags for post-processing after the ISR finishes
+		// TODO
+		//osRtxPostProcess(reinterpret_cast<osRtxObject_t *>(thread));
+	}
+	else
+	{
+		// Check if Thread is waiting for Thread Flags
+		if (thread->state == osRtxThreadWaitingThreadFlags) {
+			thread_flags0 = ThreadFlagsCheck(thread, thread->wait_flags, thread->flags_options);
+			if (thread_flags0 != 0U) {
+				if ((thread->flags_options & osFlagsNoClear) == 0U) {
+					thread_flags = thread_flags0 & ~thread->wait_flags;
+				} else {
+					thread_flags = thread_flags0;
+				}
+				osRtxThreadWaitExit(thread, thread_flags0, true);
 			}
-			osRtxThreadWaitExit(thread, thread_flags0, true);
 		}
 	}
 
@@ -962,6 +1039,11 @@ uint32_t osThreadFlagsSet (osThreadId_t thread_id, uint32_t flags) {
 /// Clear the specified Thread Flags of current running thread.
 uint32_t osThreadFlagsClear (uint32_t flags)
 {
+	if (IsIrqMode() || IsIrqMasked())
+	{
+		return osErrorISR;
+	}
+
 	ThreadDispatcher::Mutex mutex;
 	osRtxThread_t *thread;
 	uint32_t     thread_flags;
@@ -986,6 +1068,11 @@ uint32_t osThreadFlagsClear (uint32_t flags)
 /// Get the current Thread Flags of current running thread.
 uint32_t osThreadFlagsGet (void)
 {
+	if (IsIrqMode() || IsIrqMasked())
+	{
+		return 0;
+	}
+
 	ThreadDispatcher::Mutex mutex;
 	const osRtxThread_t *thread;
 
@@ -1002,6 +1089,11 @@ uint32_t osThreadFlagsGet (void)
 /// Wait for one or more Thread Flags of the current running thread to become signaled.
 uint32_t osThreadFlagsWait (uint32_t flags, uint32_t options, uint32_t timeout)
 {
+	if (IsIrqMode() || IsIrqMasked())
+	{
+		return osErrorISR;
+	}
+
 	osRtxThread_t *thread;
 	uint32_t     thread_flags;
 

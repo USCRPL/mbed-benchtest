@@ -102,7 +102,7 @@ cmsis_rv (void) {
 int mbed_start(void)
 {
 	cmsis_rv();
-	osThreadExit();
+	exit(0);
 }
 
 /**

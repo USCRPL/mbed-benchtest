@@ -729,7 +729,7 @@ void TC_ThreadParam (void) {
 \details
 - Call all thread management functions from the ISR
 */
-/*
+
 void TC_ThreadInterrupts (void) {
   
   TST_IRQHandler = Thread_IRQHandler;
@@ -758,10 +758,7 @@ void TC_ThreadInterrupts (void) {
     ISR_ExNum = 1; // Test: osThreadGetId
     NVIC_SetPendingIRQ((IRQn_Type)0);
 
-    // [ILG]
-    osDelay(2);
-
-    ASSERT_TRUE (ThId_Isr == NULL);
+    ASSERT_TRUE (ThId_Isr == ThId_Running);
 
     // [ILG]
     ThPr_Isr = osPriorityNormal;
@@ -810,7 +807,7 @@ void TC_ThreadInterrupts (void) {
     NVIC_DisableIRQ((IRQn_Type)0);
   }
 }
-*/
+
 
 /**
 @}

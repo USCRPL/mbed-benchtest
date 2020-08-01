@@ -8,6 +8,7 @@
 #include "RTE_Components.h"
 #include "RV_Framework.h"
 #include "RV_Config.h"
+#include "rtxoff_nvic.h"
 
 /*-----------------------------------------------------------------------------
  *      Variables declarations
@@ -37,7 +38,9 @@ static void TS_Init (void) {
 #endif 
 #ifdef RTE_RV_WAITFUNC
   StartCortexCycleCounter();
-#endif 
+#endif
+	TST_IRQHandler = NULL;
+	NVIC_SetVector((IRQn_Type)0, DEF_IRQHandler);
 }
 
 /*-----------------------------------------------------------------------------
@@ -55,7 +58,7 @@ static TEST_CASE TC_LIST[] = {
   TCD ( TC_ThreadChainedCreate,                  1      ),
   TCD ( TC_ThreadYield,                          1      ),
   TCD ( TC_ThreadParam,                          1      ),
-  //TCD ( TC_ThreadInterrupts,                     1      ),
+  TCD ( TC_ThreadInterrupts,                     1      ),
 #endif                                        
 #ifdef RTE_RV_GENWAIT                         
   TCD ( TC_GenWaitBasic,                         1      ),

@@ -11,7 +11,7 @@
 
 // Called after an interrupt is added to the interrupt queue.
 // Should be called with the interrupts mutex held (which is passed in here so we can unlock it).
-void deliverNewInterrupts(std::unique_lock<std::recursive_mutex> & interruptDataLock)
+void deliverNewInterrupt(InterruptData & interrupt, std::unique_lock<std::recursive_mutex> & interruptDataLock)
 {
 	if(ThreadDispatcher::instance().interrupt.active)
 	{
@@ -20,11 +20,18 @@ void deliverNewInterrupts(std::unique_lock<std::recursive_mutex> & interruptData
 	}
 	else
 	{
+		// unlock the interrupts mutex so the scheduler can run
+		interruptDataLock.unlock();
+
+		// Note: It should be more or less safe to access interrupt.pending and interrupt.enabled here even without the mutex locked.
+		// We wouldn't want to access the other ThreadDispatcher interrupt data because other threads (e.g. test harness
+		// code) could be changing those.  The only issue would be if two threads (at least one of which has to be
+		// a test harness thread) try to SetPending the same interrupt at the same time, it could be called once or
+		// twice, but that's basically expected behavior anyway.
+
 		// Following real-time behavior, wait for the new interrupt to be executed.
-		while(true)
+		while(ThreadDispatcher::instance().interrupt.enabled && interrupt.enabled && interrupt.pending)
 		{
-			// unlock the interrupts mutex so the scheduler can run
-			interruptDataLock.unlock();
 
 			// request the scheduler to run
 			ThreadDispatcher::instance().requestSchedule();
@@ -33,16 +40,25 @@ void deliverNewInterrupts(std::unique_lock<std::recursive_mutex> & interruptData
 #else
 #error TODO
 #endif
-			// now relock the mutex and check if there are any interrupts left
-			interruptDataLock.lock();
-			if(ThreadDispatcher::instance().interrupt.pendingInterrupts.empty())
-			{
-				return;
-			}
 		}
 
-		ThreadDispatcher::instance().
+		interruptDataLock.lock();
 	}
+}
+
+/**
+ * Get a reference to an interrupt data, adding it to the map if needed.
+ * @param IRQn
+ * @return
+ */
+InterruptData & getInterruptData(IRQn_Type IRQn)
+{
+	auto interruptDataIter = ThreadDispatcher::instance().interrupt.interruptData.find(IRQn);
+	if(interruptDataIter == ThreadDispatcher::instance().interrupt.interruptData.end())
+	{
+		interruptDataIter = ThreadDispatcher::instance().interrupt.interruptData.insert(std::make_pair(IRQn, InterruptData(IRQn))).first;
+	}
+	return interruptDataIter->second;
 }
 
 // implementations
@@ -63,80 +79,87 @@ uint32_t NVIC_GetPriorityGrouping(void)
 void NVIC_EnableIRQ(IRQn_Type IRQn)
 {
 	std::unique_lock<std::recursive_mutex> interruptDataLock(ThreadDispatcher::instance().interrupt.mutex);
-	ThreadDispatcher::instance().interrupt.interruptData[IRQn].enabled = true;
+
+	InterruptData & interruptData = getInterruptData(IRQn);
+	interruptData.enabled = true;
 
 	// if interrupt was previously pending, add it to the queue.
-	if(ThreadDispatcher::instance().interrupt.interruptData[IRQn].pending)
+	if(interruptData.pending)
 	{
-		ThreadDispatcher::instance().interrupt.pendingInterrupts.insert(&ThreadDispatcher::instance().interrupt.interruptData[IRQn]);
-		deliverNewInterrupts(interruptDataLock);
+		ThreadDispatcher::instance().interrupt.pendingInterrupts.insert(&interruptData);
+		deliverNewInterrupt(interruptData, interruptDataLock);
 	}
 }
 
 uint32_t NVIC_GetEnableIRQ(IRQn_Type IRQn)
 {
 	std::unique_lock<std::recursive_mutex> interruptDataLock(ThreadDispatcher::instance().interrupt.mutex);
-	return ThreadDispatcher::instance().interrupt.interruptData[IRQn].enabled;
+	return getInterruptData(IRQn).enabled;
 }
 
 void NVIC_DisableIRQ(IRQn_Type IRQn)
 {
 	std::unique_lock<std::recursive_mutex> interruptDataLock(ThreadDispatcher::instance().interrupt.mutex);
-	ThreadDispatcher::instance().interrupt.interruptData[IRQn].enabled = false;
+	getInterruptData(IRQn).enabled = false;
 }
 
 void NVIC_SetVector(IRQn_Type IRQn, void (*vector)())
 {
 	std::unique_lock<std::recursive_mutex> interruptDataLock(ThreadDispatcher::instance().interrupt.mutex);
-	ThreadDispatcher::instance().interrupt.interruptData[IRQn].vector = vector;
+	getInterruptData(IRQn).vector = vector;
 }
 
 void (*NVIC_GetVector(IRQn_Type IRQn))()
 {
 	std::unique_lock<std::recursive_mutex> interruptDataLock(ThreadDispatcher::instance().interrupt.mutex);
-	return ThreadDispatcher::instance().interrupt.interruptData[IRQn].vector;
+	return getInterruptData(IRQn).vector;
 }
 
 uint32_t NVIC_GetPendingIRQ(IRQn_Type IRQn)
 {
 	std::unique_lock<std::recursive_mutex> interruptDataLock(ThreadDispatcher::instance().interrupt.mutex);
-	return ThreadDispatcher::instance().interrupt.interruptData[IRQn].pending;
+	return getInterruptData(IRQn).pending;
 }
 
 void NVIC_SetPendingIRQ(IRQn_Type IRQn)
 {
 	std::unique_lock<std::recursive_mutex> interruptDataLock(ThreadDispatcher::instance().interrupt.mutex);
-	ThreadDispatcher::instance().interrupt.interruptData[IRQn].pending = true;
-	ThreadDispatcher::instance().interrupt.pendingInterrupts.insert(&interruptData[IRQn]);
 
-	deliverNewInterrupts(interruptDataLock);
+	InterruptData & interruptData = getInterruptData(IRQn);
+
+	interruptData.pending = true;
+	ThreadDispatcher::instance().interrupt.pendingInterrupts.insert(&interruptData);
+
+	deliverNewInterrupt(interruptData, interruptDataLock);
 }
 
 void NVIC_ClearPendingIRQ(IRQn_Type IRQn)
 {
 	std::unique_lock<std::recursive_mutex> interruptDataLock(ThreadDispatcher::instance().interrupt.mutex);
 
-	ThreadDispatcher::instance().interrupt.interruptData[IRQn].pending = false;
-	ThreadDispatcher::instance().interrupt.pendingInterrupts.erase(&interruptData[IRQn]);
+	InterruptData & interruptData = getInterruptData(IRQn);
+
+	interruptData.pending = false;
+	ThreadDispatcher::instance().interrupt.pendingInterrupts.erase(&interruptData);
 }
 
 uint32_t NVIC_GetActive(IRQn_Type IRQn) {
 	std::unique_lock<std::recursive_mutex> interruptDataLock(ThreadDispatcher::instance().interrupt.mutex);
 
-	return ThreadDispatcher::instance().interrupt.interruptData[IRQn].active;
+	return getInterruptData(IRQn).active;
 }
 
 void NVIC_SetPriority(IRQn_Type IRQn, uint32_t priority) {
 	std::unique_lock<std::recursive_mutex> interruptDataLock(ThreadDispatcher::instance().interrupt.mutex);
 
-	ThreadDispatcher::instance().interrupt.interruptData[IRQn].priority = priority;
+	getInterruptData(IRQn).priority = priority;
 }
 
 uint32_t NVIC_GetPriority(IRQn_Type IRQn)
 {
 	std::unique_lock<std::recursive_mutex> interruptDataLock(ThreadDispatcher::instance().interrupt.mutex);
 
-	return ThreadDispatcher::instance().interrupt.interruptData[IRQn].priority;
+	return getInterruptData(IRQn).priority;
 }
 
 // value from core_cm3.h

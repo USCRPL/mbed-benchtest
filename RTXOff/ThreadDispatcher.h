@@ -102,11 +102,15 @@ public:
 	} timer;
 
 	struct {
-		bool active; // number of the interrupt that is currenty active
+		bool active = false; // Whether an ISR is currently being called
 		uint32_t priorityGroupMask;  // Priority group mask, see PRIGROUP register description
 		std::map<IRQn_Type, InterruptData> interruptData; // data for each interrupt.
 		std::set<InterruptData *, InterruptDataComparator> pendingInterrupts; // Set of interrupts that are pending, sorted by priority.
 		std::recursive_mutex mutex; // Seperate mutex to protect data in this struct.  OK to use std::mutex since we don't need special OS features.
+
+		// Whether interrupts are enabled for the simulated processor.
+		// Note: not protected by above mutex.
+		bool enabled = true;
 	} interrupt;
 
 	// Time of the last system tick.  Once the clock time goes one tick period past this,
@@ -220,5 +224,23 @@ public:
 	/// Process Thread Delay Tick (executed each System Tick).
 	void delayListTick();
 };
+
+// Convenience functions which get from ThreadDispatcher
+/// Check if in IRQ Mode
+/// \return     true=IRQ, false=thread
+inline bool IsIrqMode (void)
+{
+	// note: it's not necessary to lock the interrupts mutex here because since we are in RTXOff code
+	// the only way this could be true is if we are being called from an interrupt handler, and it is
+	// always false during the time a normal thread is executing.
+	return ThreadDispatcher::instance().interrupt.active;
+}
+
+/// Check if IRQ is Masked
+/// \return     true=masked, false=not masked
+inline bool IsIrqMasked (void) {
+	return !ThreadDispatcher::instance().interrupt.enabled;
+}
+
 
 #endif //THREADDISPATCHER_H

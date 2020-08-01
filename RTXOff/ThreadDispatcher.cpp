@@ -57,7 +57,7 @@ void ThreadDispatcher::dispatchForever()
 		// wait on the kernel mode cond var
 		// note: a spurious wakeup is OK, because if the next thread hasn't changed and there is no timer tick, then
 		// waking up won't do anything.
-		bool sleepTimedOut = SleepConditionVariableCS(&kernelModeCondVar, &kernelDataMutex, OS_TICK_PERIOD_MS) == 0;
+		SleepConditionVariableCS(&kernelModeCondVar, &kernelDataMutex, OS_TICK_PERIOD_MS);
 
 
 		if(thread.run.curr != nullptr)
@@ -338,7 +338,7 @@ void ThreadDispatcher::delayListTick()
 					break;
 			}
 #if RTXOFF_DEBUG
-			std::cerr << delayTopThread << " has finished its waiting period, moving to ready list" << std::endl;
+			std::cerr << delayTopThread->name << " has finished its waiting period, moving to ready list" << std::endl;
 #endif
 			osRtxThreadListRemove(delayTopThread);
 			osRtxThreadReadyPut(delayTopThread);
@@ -359,13 +359,20 @@ void ThreadDispatcher::processInterrupts()
 	std::unique_lock<std::recursive_mutex> lock(interrupt.mutex);
 
 	// More interrupts could be added when we call interrupt handlers, so loop in a way that handles that
-	while(!interrupt.pendingInterrupts.empty())
+	while(interrupt.enabled && !interrupt.pendingInterrupts.empty())
 	{
 		InterruptData * currInterrupt = *interrupt.pendingInterrupts.begin();
 
+#if RTXOFF_DEBUG
+		std::cerr << "Calling interrupt vector for IRQ " << currInterrupt->irq << std::endl;
+#endif
+
 		// deliver this interrupt
 		currInterrupt->active = true;
-		currInterrupt->vector();
+		if(currInterrupt->vector != nullptr)
+		{
+			currInterrupt->vector();
+		}
 
 		// now remove it from the queue
 		currInterrupt->active = false;

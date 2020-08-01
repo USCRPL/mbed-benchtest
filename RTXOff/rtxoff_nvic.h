@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 
-#ifdef _cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -166,7 +166,7 @@ void NVIC_SetVector(IRQn_Type IRQn, void (*vector)());
  */
 void (*NVIC_GetVector(IRQn_Type IRQn))();
 
-#ifdef _cplusplus
+#ifdef __cplusplus
 }
 #endif
 

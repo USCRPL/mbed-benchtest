@@ -15,7 +15,7 @@ set(RTX_OFF_SOURCES
 
 	# Fake NVIC API
 	rtxoff_nvic.h
-	#rtxoff_nvic.cpp
+	rtxoff_nvic.cpp
 
 	# implementations
 	RTX_Config.h
