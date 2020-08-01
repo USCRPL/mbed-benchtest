@@ -299,3 +299,96 @@ osStatus_t osMutexRelease (osMutexId_t mutex_id)
 
 	return osOK;
 }
+
+/// Get Thread which owns a Mutex object.
+osThreadId_t osMutexGetOwner (osMutexId_t mutex_id)
+{
+	ThreadDispatcher::Mutex dispMutex;
+	osRtxMutex_t *mutex = reinterpret_cast<osRtxMutex_t *>(mutex_id);
+
+	// Check parameters
+	if ((mutex == NULL) || (mutex->id != osRtxIdMutex)) {
+		return NULL;
+	}
+
+	// Check if Mutex is not locked
+	if (mutex->lock == 0U) {
+		return NULL;
+	}
+
+	return mutex->owner_thread;
+}
+
+/// Delete a Mutex object.
+osStatus_t osMutexDelete (osMutexId_t mutex_id)
+{
+	ThreadDispatcher::Mutex dispMutex;
+	osRtxMutex_t *mutex = reinterpret_cast<osRtxMutex_t *>(mutex_id);
+
+	const osRtxMutex_t  *mutex0;
+	osRtxThread_t *thread;
+	int8_t       priority;
+
+	osRtxThread_t *thisThread = ThreadDispatcher::instance().thread.run.curr;
+
+	// Check parameters
+	if ((mutex == NULL) || (mutex->id != osRtxIdMutex)) {
+		return osErrorParameter;
+	}
+
+	// Check if Mutex is locked
+	if (mutex->lock != 0U) {
+
+		thread = mutex->owner_thread;
+
+		// Remove Mutex from Thread owner list
+		if (mutex->owner_next != NULL) {
+			mutex->owner_next->owner_prev = mutex->owner_prev;
+		}
+		if (mutex->owner_prev != NULL) {
+			mutex->owner_prev->owner_next = mutex->owner_next;
+		} else {
+			thread->mutex_list = mutex->owner_next;
+		}
+
+		// Restore owner Thread priority
+		if ((mutex->attr & osMutexPrioInherit) != 0U) {
+			priority = thread->priority_base;
+			mutex0   = thread->mutex_list;
+			while (mutex0 != NULL) {
+				// Mutexes owned by running Thread
+				if ((mutex0->thread_list != NULL) && (mutex0->thread_list->priority > priority)) {
+					// Higher priority Thread is waiting for Mutex
+					priority = mutex0->thread_list->priority;
+				}
+				mutex0 = mutex0->owner_next;
+			}
+			if (thread->priority != priority) {
+				thread->priority = priority;
+				osRtxThreadListSort(thread);
+			}
+		}
+
+		// Unblock waiting threads
+		while (mutex->thread_list != NULL) {
+			thread = osRtxThreadListGet(reinterpret_cast<osRtxObject_t *>(mutex));
+			osRtxThreadWaitExit(thread, (uint32_t)osErrorResource, FALSE);
+		}
+
+		// at this point a new thread might potentially take over
+		ThreadDispatcher::instance().dispatch(nullptr);
+		if(thisThread->state != osRtxThreadRunning)
+		{
+			// other thread has higher priority, switch to it
+			ThreadDispatcher::instance().blockUntilWoken();
+		}
+	}
+
+	// Mark object as invalid
+	mutex->id = osRtxIdInvalid;
+
+	// Free object memory
+	delete mutex;
+
+	return osOK;
+}

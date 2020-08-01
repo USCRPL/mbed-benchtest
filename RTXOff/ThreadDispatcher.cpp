@@ -82,6 +82,12 @@ void ThreadDispatcher::dispatchForever()
 			exit(4);
 		}
 
+		// check if there are interrupts to process
+		if(!interrupt.pendingInterrupts.empty())
+		{
+			processInterrupts();
+		}
+
 		// regardless of what else happened, check if enough time has passed to deliver a tick.
 		if(std::chrono::steady_clock::now() - lastTickTime >= std::chrono::milliseconds(OS_TICK_PERIOD_MS))
 		{
@@ -343,6 +349,32 @@ void ThreadDispatcher::delayListTick()
 		}
 		thread.delay_list = delayTopThread;
 	}
+}
+
+void ThreadDispatcher::processInterrupts()
+{
+	// set global interrupt flag
+	interrupt.active = true;
+
+	std::unique_lock<std::recursive_mutex> lock(interrupt.mutex);
+
+	// More interrupts could be added when we call interrupt handlers, so loop in a way that handles that
+	while(!interrupt.pendingInterrupts.empty())
+	{
+		InterruptData * currInterrupt = *interrupt.pendingInterrupts.begin();
+
+		// deliver this interrupt
+		currInterrupt->active = true;
+		currInterrupt->vector();
+
+		// now remove it from the queue
+		currInterrupt->active = false;
+		currInterrupt->pending = false;
+		interrupt.pendingInterrupts.erase(currInterrupt);
+	}
+
+	interrupt.active = false;
+	return;
 }
 
 

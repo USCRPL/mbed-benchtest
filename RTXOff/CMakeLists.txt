@@ -13,6 +13,10 @@ set(RTX_OFF_SOURCES
 	mbed_rtx_conf.h
 	mbed_rtxoff_storage.h
 
+	# Fake NVIC API
+	rtxoff_nvic.h
+	#rtxoff_nvic.cpp
+
 	# implementations
 	RTX_Config.h
 	rtxoff_internal.h
@@ -20,6 +24,7 @@ set(RTX_OFF_SOURCES
 	rtxoff_thread.cpp
 	rtxoff_mutex.cpp
 	rtxoff_delay.cpp
+	rtxoff_evflags.cpp
 	ThreadDispatcher.cpp
 	ThreadDispatcher.h
 

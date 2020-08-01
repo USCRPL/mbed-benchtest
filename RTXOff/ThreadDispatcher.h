@@ -6,10 +6,42 @@
 #define THREADDISPATCHER_H
 
 #include "rtxoff_internal.h"
+#include "rtxoff_nvic.h"
 
 #include "RTX_Config.h"
 
 #include <chrono>
+#include <map>
+#include <set>
+#include <mutex>
+
+struct InterruptData
+{
+	IRQn_Type irq;
+	InterruptData(IRQn_Type _irq): irq(_irq) {}
+	bool enabled = false; // Whether this interrupt is enabled (can be triggered)
+	bool pending = false; // Whether this interrupt is pending (will be called)
+	bool active = false; // whether this interrupt is currently being delivered
+	void (*vector)() = nullptr; // Interrupt vector to call for this interrupt
+	uint8_t priority = 0x0; // Priority.  Lower value will be triggered first.
+};
+
+struct InterruptDataComparator
+{
+	bool operator()(InterruptData const * lhs, InterruptData const * rhs) const
+	{
+		if(lhs->priority != rhs->priority)
+		{
+			// we want the lowest priority to sort first in the set.
+			return lhs->priority < rhs->priority;
+		}
+		else
+		{
+			// per the specs, fall back to interrupt number
+			return lhs->irq < rhs->irq;
+		}
+	}
+};
 
 /**
  * To implement CMSIS-RTOS on top of a desktop OS, one OS thread is maintained for each RTX
@@ -68,6 +100,14 @@ public:
 		osRtxMessageQueue_t           *mq = nullptr;  ///< Timer Message Queue
 		void                (*tick)() = nullptr;  ///< Timer Tick Function
 	} timer;
+
+	struct {
+		bool active; // number of the interrupt that is currenty active
+		uint32_t priorityGroupMask;  // Priority group mask, see PRIGROUP register description
+		std::map<IRQn_Type, InterruptData> interruptData; // data for each interrupt.
+		std::set<InterruptData *, InterruptDataComparator> pendingInterrupts; // Set of interrupts that are pending, sorted by priority.
+		std::recursive_mutex mutex; // Seperate mutex to protect data in this struct.  OK to use std::mutex since we don't need special OS features.
+	} interrupt;
 
 	// Time of the last system tick.  Once the clock time goes one tick period past this,
 	// we call the tick handler.
@@ -146,8 +186,7 @@ public:
 
 	/**
 	 * Cause the scheduler to be woken up and schedule whatever thread is currently set as the next one.
-	 * This will happen as soon as the kernel mode mutex is released (which you should be holding if
-	 * you are calling this function).
+	 * This will happen as soon as the kernel mode mutex is released if you are currently holding it.
 	 */
 	void requestSchedule();
 
@@ -158,6 +197,13 @@ public:
 	 * Expects to be called with the kernel mode mutex locked.
 	 */
 	void blockUntilWoken();
+
+	/**
+	 * Process interrupts in the interrupt queue by calling the interrupt handler functions.
+	 * Continues to process interrupts until there are no more left to deliver.
+	 * Interrupt vectors will be run synchronously in the scheduler thread.
+	 */
+	void processInterrupts();
 
 	// RTX Delay list functions
 	// -------------------------------------------------------

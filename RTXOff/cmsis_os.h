@@ -159,6 +159,7 @@
 #include <stddef.h>
 #endif
 #include "rtxoff_os.h"
+#include "rtxoff_nvic.h"
  
 #ifdef  __cplusplus
 extern "C"
