@@ -90,6 +90,7 @@ osEventFlagsId_t osEventFlagsNew (const osEventFlagsAttr_t *attr)
 		ef->event_flags = 0U;
 
 		// Register post ISR processing function
+		// TODO
 		//ThreadDispatcher::instance().post_process.event_flags = osRtxEventFlagsPostProcess;
 
 	}

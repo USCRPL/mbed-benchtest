@@ -14,6 +14,7 @@
 #include <map>
 #include <set>
 #include <mutex>
+#include <queue>
 
 struct InterruptData
 {
@@ -113,6 +114,20 @@ public:
 		bool enabled = true;
 	} interrupt;
 
+	///< ISR Post Processing functions.
+	// Certain things that function inside ISRs need to have a portion that is called outside of the ISR.
+	// So, they add objects to a list, and once the ISR is finished the objects are processed using
+	// these functions.
+	struct {
+		void          (*thread)(osRtxThread_t*);    ///< Thread Post Processing function
+		void (*event_flags)(osRtxEventFlags_t*);    ///< Event Flags Post Processing function
+		void    (*semaphore)(osRtxSemaphore_t*);    ///< Semaphore Post Processing function
+		void (*memory_pool)(osRtxMemoryPool_t*);    ///< Memory Pool Post Processing function
+		void        (*message)(osRtxMessage_t*);    ///< Message Post Processing function
+	} post_process;
+
+	std::queue<osRtxObject_t *> isr_queue;
+
 	// Time of the last system tick.  Once the clock time goes one tick period past this,
 	// we call the tick handler.
 	std::chrono::steady_clock::time_point lastTickTime;
@@ -202,12 +217,26 @@ public:
 	 */
 	void blockUntilWoken();
 
+	// Interrupt handling functions
+	// -------------------------------------------------------
+
 	/**
 	 * Process interrupts in the interrupt queue by calling the interrupt handler functions.
 	 * Continues to process interrupts until there are no more left to deliver.
 	 * Interrupt vectors will be run synchronously in the scheduler thread.
 	 */
 	void processInterrupts();
+
+	/**
+	 * Enqueue an object for post processing after the ISR.
+	 * @param object
+	 */
+	void queuePostProcess(osRtxObject_t * object);
+
+	/**
+	 * Process any queued events from functions called by ISRs.
+	 */
+	void processQueuedISRData();
 
 	// RTX Delay list functions
 	// -------------------------------------------------------

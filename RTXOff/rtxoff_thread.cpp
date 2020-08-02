@@ -294,6 +294,24 @@ bool osRtxThreadWaitEnter (uint8_t state, uint32_t timeout) {
 	return true;
 }
 
+//  ==== Post ISR processing ====
+
+/// Thread post ISR processing.
+/// \param[in]  thread          thread object.
+static void osRtxThreadPostProcess (osRtxThread_t *thread) {
+	uint32_t thread_flags;
+
+	// Check if Thread is waiting for Thread Flags
+	if (thread->state == osRtxThreadWaitingThreadFlags) {
+		thread_flags = ThreadFlagsCheck(thread, thread->wait_flags, thread->flags_options);
+		if (thread_flags != 0U) {
+			osRtxThreadWaitExit(thread, thread_flags, FALSE);
+		}
+	}
+}
+
+//  ==== Public API ====
+
 /*
  * Helper function and struct for starting threads.
  * Assembly code in RTX causes threads to call osThreadExit() after they return from their main functions.
@@ -327,6 +345,9 @@ osThreadId_t osThreadNew (osThreadFunc_t func, void *argument, const osThreadAtt
 	}
 
 	ThreadDispatcher::Mutex mutex;
+
+	// Register post ISR processing function
+	ThreadDispatcher::instance().post_process.thread = osRtxThreadPostProcess;
 
 	osRtxThread_t * callingThread = ThreadDispatcher::instance().thread.run.curr;
 	osRtxThread_t *thread = nullptr;
@@ -450,7 +471,6 @@ const char *osThreadGetName (osThreadId_t thread_id)
 /// Return the thread ID of the current running thread.
 osThreadId_t osThreadGetId()
 {
-	osThreadId_t thread_id;
 	ThreadDispatcher::Mutex mutex;
 
 	return reinterpret_cast<osThreadId_t>(ThreadDispatcher::instance().thread.run.curr);
@@ -993,6 +1013,7 @@ uint32_t osThreadFlagsSet (osThreadId_t thread_id, uint32_t flags)
 {
 	ThreadDispatcher::Mutex mutex;
 	osRtxThread_t *thread = reinterpret_cast<osRtxThread_t *>(thread_id);
+	osRtxThread_t * thisThread = ThreadDispatcher::instance().thread.run.curr;
 
 	uint32_t     thread_flags;
 	uint32_t     thread_flags0;
@@ -1014,8 +1035,7 @@ uint32_t osThreadFlagsSet (osThreadId_t thread_id, uint32_t flags)
 	if (IsIrqMode() || IsIrqMasked())
 	{
 		// flag thread flags for post-processing after the ISR finishes
-		// TODO
-		//osRtxPostProcess(reinterpret_cast<osRtxObject_t *>(thread));
+		ThreadDispatcher::instance().queuePostProcess(reinterpret_cast<osRtxObject_t *>(thread));
 	}
 	else
 	{
@@ -1029,6 +1049,12 @@ uint32_t osThreadFlagsSet (osThreadId_t thread_id, uint32_t flags)
 					thread_flags = thread_flags0;
 				}
 				osRtxThreadWaitExit(thread, thread_flags0, true);
+
+				if(thisThread->state != osRtxThreadRunning)
+				{
+					// scheduler decided to run another thread
+					ThreadDispatcher::instance().blockUntilWoken();
+				}
 			}
 		}
 	}

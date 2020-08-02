@@ -43,7 +43,6 @@ osThreadId osThreadCreate (const osThreadDef_t *thread_def, void *argument) {
 
 
 // Signals
-/*
 #if !defined(os1_Disable_Signal)
 
 #define SignalMask ((1U<<osFeature_Signals)-1U)
@@ -104,7 +103,7 @@ os_InRegs osEvent osSignalWait (int32_t signals, uint32_t millisec) {
 
 #endif  // Signal
 
-
+/*
 // Timer
 #if !defined(os1_Disable_Timer)
 osTimerId osTimerCreate (const osTimerDef_t *timer_def, os_timer_type type, void *argument) {

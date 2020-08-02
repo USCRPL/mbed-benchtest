@@ -226,6 +226,77 @@ void ThreadDispatcher::blockUntilWoken()
 	lockMutex();
 }
 
+void ThreadDispatcher::processInterrupts()
+{
+	// set global interrupt flag
+	interrupt.active = true;
+
+	std::unique_lock<std::recursive_mutex> lock(interrupt.mutex);
+
+	// More interrupts could be added when we call interrupt handlers, so loop in a way that handles that
+	while(interrupt.enabled && !interrupt.pendingInterrupts.empty())
+	{
+		InterruptData * currInterrupt = *interrupt.pendingInterrupts.begin();
+
+#if RTXOFF_DEBUG
+		std::cerr << "Calling interrupt vector for IRQ " << currInterrupt->irq << std::endl;
+#endif
+
+		// deliver this interrupt
+		currInterrupt->active = true;
+		if(currInterrupt->vector != nullptr)
+		{
+			currInterrupt->vector();
+		}
+
+		// now remove it from the queue
+		currInterrupt->active = false;
+		currInterrupt->pending = false;
+		interrupt.pendingInterrupts.erase(currInterrupt);
+	}
+
+	interrupt.active = false;
+	return;
+}
+
+void ThreadDispatcher::queuePostProcess(osRtxObject_t *object)
+{
+	isr_queue.push(object);
+}
+
+void ThreadDispatcher::processQueuedISRData()
+{
+	while(!isr_queue.empty())
+	{
+		osRtxObject_t *object = isr_queue.front();
+		isr_queue.pop();
+
+		if (object == NULL) {
+			break;
+		}
+		switch (object->id) {
+			case osRtxIdThread:
+				post_process.thread(reinterpret_cast<osRtxThread_t *>(object));
+				break;
+			case osRtxIdEventFlags:
+				post_process.event_flags(reinterpret_cast<osRtxEventFlags_t *>(object));
+				break;
+			case osRtxIdSemaphore:
+				post_process.semaphore(reinterpret_cast<osRtxSemaphore_t *>(object));
+				break;
+			case osRtxIdMemoryPool:
+				post_process.memory_pool(reinterpret_cast<osRtxMemoryPool_t *>(object));
+				break;
+			case osRtxIdMessage:
+				post_process.message(reinterpret_cast<osRtxMessage_t *>(object));
+				break;
+			default:
+				// Should never come here
+				break;
+		}
+	}
+}
+
 void ThreadDispatcher::delayListInsert(osRtxThread_t *toDelay, uint32_t delay)
 {
 	osRtxThread_t *prev, *next;
@@ -350,39 +421,5 @@ void ThreadDispatcher::delayListTick()
 		thread.delay_list = delayTopThread;
 	}
 }
-
-void ThreadDispatcher::processInterrupts()
-{
-	// set global interrupt flag
-	interrupt.active = true;
-
-	std::unique_lock<std::recursive_mutex> lock(interrupt.mutex);
-
-	// More interrupts could be added when we call interrupt handlers, so loop in a way that handles that
-	while(interrupt.enabled && !interrupt.pendingInterrupts.empty())
-	{
-		InterruptData * currInterrupt = *interrupt.pendingInterrupts.begin();
-
-#if RTXOFF_DEBUG
-		std::cerr << "Calling interrupt vector for IRQ " << currInterrupt->irq << std::endl;
-#endif
-
-		// deliver this interrupt
-		currInterrupt->active = true;
-		if(currInterrupt->vector != nullptr)
-		{
-			currInterrupt->vector();
-		}
-
-		// now remove it from the queue
-		currInterrupt->active = false;
-		currInterrupt->pending = false;
-		interrupt.pendingInterrupts.erase(currInterrupt);
-	}
-
-	interrupt.active = false;
-	return;
-}
-
 
 
