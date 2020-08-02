@@ -154,6 +154,8 @@ void NVIC_DecodePriority(uint32_t Priority, uint32_t PriorityGroup, uint32_t *co
   \param [in]   IRQn      Interrupt number
   \param [in]   vector    Address of interrupt handler function
  */
+// RTXOff NOTE: the second parameter had to be changed from uint32_t to a pointer type here.
+// Otherwise the complete pointer could not be stored on 64 bit systems!
 void NVIC_SetVector(IRQn_Type IRQn, void (*vector)());
 
 /**

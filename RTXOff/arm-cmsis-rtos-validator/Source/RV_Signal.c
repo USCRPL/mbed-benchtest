@@ -21,9 +21,7 @@ osThreadId Var_ThreadId;
 
 
 /* Definitions for TC_SignalChildThread */
-void Th_ChildSignals (void const *arg);
-osThreadDef (Th_ChildSignals, osPriorityNormal, 1, 0);
-
+void Th_ChildSignals (void *arg);
 
 /* Definitions for TC_SignalChildToParent */
 #define SIG_FLAG_MSK ((1 << osFeature_Signals) - 1) /* Signal flag mask       */
@@ -31,26 +29,26 @@ osThreadDef (Th_ChildSignals, osPriorityNormal, 1, 0);
 void Th_Sig (void const *arg);          /* Signaling thread prototype         */
 
 // [ILG]
-// osThreadDef (Th_Sig, osPriorityNormal, 1, 200);
-osThreadDef (Th_Sig, osPriorityNormal, 1, 0);
+// osThreadDef (Th_Sig, osPriorityNormal, 200);
+osThreadDef (Th_Sig, osPriorityNormal, 0);
 osThreadId ThId_Sig;
 
 // [ILG]
 void Th_Wakeup (void const *arg);          /* Signaling thread prototype         */
-osThreadDef (Th_Wakeup, osPriorityBelowNormal, 1, 0);
+osThreadDef (Th_Wakeup, osPriorityBelowNormal, 0);
 // ----
 
 /* Definitions for TC_SignalChildToChild */
 void Th_Sig_Child_0 (void const *arg);
 void Th_Sig_Child_1 (void const *arg);
 
-osThreadDef (Th_Sig_Child_0, osPriorityBelowNormal, 1, 0);
-osThreadDef (Th_Sig_Child_1, osPriorityBelowNormal, 1, 0);
+osThreadDef (Th_Sig_Child_0, osPriorityBelowNormal, 0);
+osThreadDef (Th_Sig_Child_1, osPriorityBelowNormal, 0);
 
 /* Definitions for TC_SignalWaitTimeout */
 void Th_SignalSet (void const *arg);
 
-osThreadDef (Th_SignalSet, osPriorityNormal, 1, 0);
+osThreadDef (Th_SignalSet, osPriorityNormal, 0);
 
 
 /* Definitions for signal management test in the ISR */
@@ -97,7 +95,7 @@ void Th_Sig (void const *arg) {
 // Thread used to test if the signal set can wake-up the thread before timeout
 void Th_Wakeup (void const *arg)
 {
-  osDelay((int)arg);
+  osDelay((uint32_t)((ptrdiff_t)arg));
   /* Send signal back to the main thread */
   ASSERT_TRUE (osSignalSet (Var_ThreadId, 1) != 0x80000000);
 }
@@ -131,8 +129,8 @@ void Th_SignalSet (void const *arg) {
 /*-----------------------------------------------------------------------------
  * Child signals thread
  *----------------------------------------------------------------------------*/
-void Th_ChildSignals (void const *arg) {
-  int32_t flags, set, clr, max;
+void Th_ChildSignals (void *arg) {
+  int64_t flags, set, clr, max;
   osThreadId t_id = osThreadGetId();
   
   ASSERT_TRUE (t_id != NULL);
@@ -147,7 +145,7 @@ void Th_ChildSignals (void const *arg) {
       flags = (flags << 1) | 1;
       set <<= 1;
     }
-    while (set < (1 << osFeature_Signals));
+    while (set < (((int64_t)1) << osFeature_Signals));
 
     /* MSB flag cannot be set by user */
     ASSERT_TRUE (osSignalSet (t_id, 0x80000000) == 0x80000000);
@@ -243,7 +241,7 @@ The test cases check the osSignal* functions.
 - Clear all signal flags for the main thread
 */
 void TC_SignalMainThread (void) {
-  int32_t flags, set, clr, max;
+  int64_t flags, set, clr, max;
   osThreadId t_id = osThreadGetId();
   
   ASSERT_TRUE (t_id != NULL);
@@ -251,7 +249,7 @@ void TC_SignalMainThread (void) {
   if (t_id != NULL) {
     /* Clear signal flags */
     // [ILG]
-    flags = (1 << osFeature_Signals) - 1;
+    flags = (((int64_t)1) << osFeature_Signals) - 1;
     osSignalClear (t_id, flags);
     
     /* Set all signal flags */
@@ -263,7 +261,7 @@ void TC_SignalMainThread (void) {
       flags = (flags << 1) | 1;
       set <<= 1;
     }
-    while (set < (1 << osFeature_Signals));
+    while (set < (((int64_t)1) << osFeature_Signals));
         
     /* Clear all signal flags */
     flags = max;
@@ -290,8 +288,24 @@ void TC_SignalMainThread (void) {
 - Clear all signal flags
 - Verify that all signal flags are cleared
 */
-void TC_SignalChildThread (void) {
-  ASSERT_TRUE (osThreadCreate (osThread(Th_ChildSignals), NULL) != NULL);
+void TC_SignalChildThread (void)
+{
+	// use v2 thread API to allow a joinable thread
+	static const osThreadAttr_t child_signals_thread_attr = {
+			"Th_ChildSignals",
+			osThreadJoinable,
+			NULL,
+			0,
+			NULL,
+			0,
+			osPriorityNormal,
+			0U,
+			0U
+	};
+
+  osThreadId_t childID = osThreadNew(Th_ChildSignals, NULL, &child_signals_thread_attr);
+  ASSERT_TRUE (childID != NULL);
+  osThreadJoin(childID);
 }
 
 /*=======0=========1=========2=========3=========4=========5=========6=========7=========8=========9=========0=========1====*/

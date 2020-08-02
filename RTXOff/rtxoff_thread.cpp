@@ -1123,7 +1123,7 @@ uint32_t osThreadFlagsWait (uint32_t flags, uint32_t options, uint32_t timeout)
 	osRtxThread_t *thread;
 	uint32_t     thread_flags;
 
-	ThreadDispatcher::instance().lockMutex();
+	ThreadDispatcher::Mutex mutex;
 
 	// Check running thread
 	thread = ThreadDispatcher::instance().thread.run.curr;

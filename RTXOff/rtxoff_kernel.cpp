@@ -107,3 +107,39 @@ osStatus_t osKernelStart (void)
 
 	ThreadDispatcher::instance().dispatchForever();
 }
+
+/// Get the RTOS kernel tick count.
+uint32_t osKernelGetTickCount (void) {
+	return ThreadDispatcher::instance().kernel.tick;
+}
+
+/// Get the RTOS kernel tick frequency.
+uint32_t osKernelGetTickFreq (void) {
+	return OS_TICK_FREQ;
+}
+
+/// Get the RTOS kernel system timer count.
+uint32_t osKernelGetSysTimerCount (void) {
+	// combine the time since the last tick, and the total number of ticks.
+	ThreadDispatcher::Mutex mutex;
+
+	using namespace std::chrono;
+
+	// get time from ticks
+	auto ticksTime = milliseconds(ThreadDispatcher::instance().kernel.tick);
+
+	// also get time since the last tick
+	auto fractionalTick = steady_clock::now() - ThreadDispatcher::instance().lastTickTime;
+
+	// combine the two to get a more accurate time
+	return (duration_cast<steady_clock::duration>(ticksTime) + fractionalTick).count();
+}
+
+/// Get the RTOS kernel system timer frequency.
+uint32_t osKernelGetSysTimerFreq (void)
+{
+	typedef std::chrono::steady_clock::duration::period clockTickRatio;
+
+	// take the inverse of the clock tick period
+	return clockTickRatio::den / clockTickRatio::num;
+}

@@ -131,6 +131,8 @@ public:
 	// Time of the last system tick.  Once the clock time goes one tick period past this,
 	// we call the tick handler.
 	std::chrono::steady_clock::time_point lastTickTime;
+	std::chrono::milliseconds tickDuration = std::chrono::milliseconds(OS_TICK_PERIOD_MS);
+
 
 
 #if USE_WINTHREAD
@@ -216,6 +218,13 @@ public:
 	 * Expects to be called with the kernel mode mutex locked.
 	 */
 	void blockUntilWoken();
+
+	/**
+	 * Update the current tick and last tick time based on the current time.
+	 *
+	 * @return true iff the current time increased by at least 1.
+	 */
+	bool updateTick();
 
 	// Interrupt handling functions
 	// -------------------------------------------------------

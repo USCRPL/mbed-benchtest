@@ -14,3 +14,4 @@ RTXOff supports interrupts, using the standard [NVIC interrupt functions](https:
 - Main Function: Without toolchain support, there's no way to override your app's main() function.  So, your app's main should be called `int mbed_start()` (`extern "C" int mbed_start()` if in C++).  RTXOff's main thread will call this function when it starts.
 - Only Windows (MSVC and MinGW) is supported right now, though UNIX support is being worked on.
 - RTXOff does not use or check the memory that your code allocates for the thread object and its stack.  Even if RTXOff did check stack sizes, your program's stack would be a different size when compiled for desktop than when built for ARM.  So, you cannot verify that your threads have enough stack space to run with RTXOff.
+- The scheduler tick frequency cannot be larger than 1000Hz (so the tick period cannot be smaller than 1ms)

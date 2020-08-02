@@ -523,7 +523,11 @@ void TC_MutexOwnership (void) {
       osSignalSet(id[0], 0x1);
       osDelay(10);
 
-      ASSERT_TRUE (osThreadTerminate (id[0]) == osOK);
+      // RTXOff: commented this out, it seems to be an error in the test case.
+      // Th_MutexAcqLow will exit as soon as it gets the 0x1 signal, which will cause
+      // its thread ID to become invalid since it is not joinable.  So this next line
+      // will cause a memory error.
+      //ASSERT_TRUE (osThreadTerminate (id[0]) == osOK);
     }
   }
   /* - Delete a mutex object */
@@ -548,7 +552,6 @@ void TC_MutexParam (void) {
 \details
 - Call all mutex management functions from the ISR
 */
-/*
 void TC_MutexInterrupts (void) {
   
   TST_IRQHandler = Mutex_IRQHandler;
@@ -605,7 +608,7 @@ void TC_MutexInterrupts (void) {
   
   NVIC_DisableIRQ((IRQn_Type)0);
 }
-*/
+
 
 /**
 @}

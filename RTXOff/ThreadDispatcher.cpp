@@ -86,13 +86,12 @@ void ThreadDispatcher::dispatchForever()
 		if(!interrupt.pendingInterrupts.empty())
 		{
 			processInterrupts();
+			processQueuedISRData();
 		}
 
 		// regardless of what else happened, check if enough time has passed to deliver a tick.
-		if(std::chrono::steady_clock::now() - lastTickTime >= std::chrono::milliseconds(OS_TICK_PERIOD_MS))
+		if(updateTick())
 		{
-			lastTickTime = std::chrono::steady_clock::now();
-
 			// deliver the next tick
 			onTick();
 
@@ -224,6 +223,20 @@ void ThreadDispatcher::blockUntilWoken()
 	}
 
 	lockMutex();
+}
+
+bool ThreadDispatcher::updateTick()
+{
+	using namespace std::chrono;
+
+	auto nowTime = steady_clock::now();
+	auto timeDelta = nowTime - lastTickTime;
+	if(timeDelta >= tickDuration)
+	{
+		// note: duration_cast always rounds down.
+		kernel.tick += duration_cast<milliseconds>(timeDelta).count();
+		lastTickTime += duration_cast<milliseconds>(timeDelta);
+	}
 }
 
 void ThreadDispatcher::processInterrupts()
@@ -421,5 +434,7 @@ void ThreadDispatcher::delayListTick()
 		thread.delay_list = delayTopThread;
 	}
 }
+
+
 
 

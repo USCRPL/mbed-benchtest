@@ -11,6 +11,8 @@
 
 // Test case config
 #define RTE_RV_THREAD
+#define RTE_RV_SIGNAL
+#define RTE_RV_MUTEX
 
 // <h> Common Test Settings
 // <o> Print Output Format <0=> Plain Text <1=> XML
