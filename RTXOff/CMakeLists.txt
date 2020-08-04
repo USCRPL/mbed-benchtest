@@ -17,6 +17,12 @@ set(RTX_OFF_SOURCES
 	rtxoff_nvic.h
 	rtxoff_nvic.cpp
 
+	# Fake Mbed APIs
+	platform/mbed_critical.h
+	platform/mbed_critical.cpp
+	rtos_idle.h
+	rtxoff_idle.cpp
+
 	# implementations
 	RTX_Config.h
 	rtxoff_internal.h
@@ -33,7 +39,7 @@ set(RTX_OFF_SOURCES
 
 add_library(rtxoff STATIC ${RTX_OFF_SOURCES})
 target_link_libraries(rtxoff)
-target_include_directories(rtxoff PUBLIC .)
+target_include_directories(rtxoff PUBLIC . platform)
 
 # detect windows vs linux
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")

@@ -29,13 +29,13 @@
 #if defined(MBED_CONF_APP_THREAD_STACK_SIZE)
 #define OS_STACK_SIZE               MBED_CONF_APP_THREAD_STACK_SIZE
 #else
-#define OS_STACK_SIZE               MBED_CONF_RTOS_THREAD_STACK_SIZE
+#define OS_STACK_SIZE               0
 #endif
 
 #ifdef MBED_CONF_APP_TIMER_THREAD_STACK_SIZE
 #define OS_TIMER_THREAD_STACK_SIZE  MBED_CONF_APP_TIMER_THREAD_STACK_SIZE
 #else
-#define OS_TIMER_THREAD_STACK_SIZE  MBED_CONF_RTOS_TIMER_THREAD_STACK_SIZE
+#define OS_TIMER_THREAD_STACK_SIZE  0
 #endif
 
 // Increase the idle thread stack size when tickless is enabled

@@ -1,0 +1,46 @@
+﻿  RV_Framework.c
+I:\RPL\mbed-benchtest\RTXOff\cmsis_os2.h(239,36): warning C4820: '<unnamed-tag>': '4' bytes padding added after data member 'attr_bits'
+I:\RPL\mbed-benchtest\RTXOff\cmsis_os2.h(241,36): warning C4820: '<unnamed-tag>': '4' bytes padding added after data member 'cb_size'
+I:\RPL\mbed-benchtest\RTXOff\cmsis_os2.h(252,36): warning C4820: '<unnamed-tag>': '4' bytes padding added after data member 'attr_bits'
+I:\RPL\mbed-benchtest\RTXOff\cmsis_os2.h(254,1): warning C4820: '<unnamed-tag>': '4' bytes padding added after data member 'cb_size'
+I:\RPL\mbed-benchtest\RTXOff\cmsis_os2.h(260,36): warning C4820: '<unnamed-tag>': '4' bytes padding added after data member 'attr_bits'
+I:\RPL\mbed-benchtest\RTXOff\cmsis_os2.h(262,1): warning C4820: '<unnamed-tag>': '4' bytes padding added after data member 'cb_size'
+I:\RPL\mbed-benchtest\RTXOff\cmsis_os2.h(268,36): warning C4820: '<unnamed-tag>': '4' bytes padding added after data member 'attr_bits'
+I:\RPL\mbed-benchtest\RTXOff\cmsis_os2.h(270,1): warning C4820: '<unnamed-tag>': '4' bytes padding added after data member 'cb_size'
+I:\RPL\mbed-benchtest\RTXOff\cmsis_os2.h(276,36): warning C4820: '<unnamed-tag>': '4' bytes padding added after data member 'attr_bits'
+I:\RPL\mbed-benchtest\RTXOff\cmsis_os2.h(278,1): warning C4820: '<unnamed-tag>': '4' bytes padding added after data member 'cb_size'
+I:\RPL\mbed-benchtest\RTXOff\cmsis_os2.h(284,36): warning C4820: '<unnamed-tag>': '4' bytes padding added after data member 'attr_bits'
+I:\RPL\mbed-benchtest\RTXOff\cmsis_os2.h(286,36): warning C4820: '<unnamed-tag>': '4' bytes padding added after data member 'cb_size'
+I:\RPL\mbed-benchtest\RTXOff\cmsis_os2.h(288,1): warning C4820: '<unnamed-tag>': '4' bytes padding added after data member 'mp_size'
+I:\RPL\mbed-benchtest\RTXOff\cmsis_os2.h(294,36): warning C4820: '<unnamed-tag>': '4' bytes padding added after data member 'attr_bits'
+I:\RPL\mbed-benchtest\RTXOff\cmsis_os2.h(296,36): warning C4820: '<unnamed-tag>': '4' bytes padding added after data member 'cb_size'
+I:\RPL\mbed-benchtest\RTXOff\cmsis_os2.h(298,1): warning C4820: '<unnamed-tag>': '4' bytes padding added after data member 'mq_size'
+I:\RPL\mbed-benchtest\RTXOff\rtxoff_os.h(121,38): warning C4820: 'osRtxThread_s': '4' bytes padding added after data member 'attr'
+I:\RPL\mbed-benchtest\RTXOff\rtxoff_os.h(140,18): warning C4820: 'osRtxThread_s': '3' bytes padding added after data member 'waitValPresent'
+I:\RPL\mbed-benchtest\RTXOff\rtxoff_os.h(169,38): warning C4820: 'osRtxTimer_s': '4' bytes padding added after data member 'type'
+I:\RPL\mbed-benchtest\RTXOff\rtxoff_os.h(186,38): warning C4820: '<unnamed-tag>': '4' bytes padding added after data member 'reserved'
+I:\RPL\mbed-benchtest\RTXOff\rtxoff_os.h(189,1): warning C4820: '<unnamed-tag>': '4' bytes padding added after data member 'event_flags'
+I:\RPL\mbed-benchtest\RTXOff\rtxoff_os.h(200,38): warning C4820: 'osRtxMutex_s': '4' bytes padding added after data member 'attr'
+I:\RPL\mbed-benchtest\RTXOff\rtxoff_os.h(207,1): warning C4820: 'osRtxMutex_s': '4' bytes padding added after data member 'padding'
+I:\RPL\mbed-benchtest\RTXOff\rtxoff_os.h(218,38): warning C4820: '<unnamed-tag>': '4' bytes padding added after data member 'reserved'
+I:\RPL\mbed-benchtest\RTXOff\rtxoff_os.h(222,1): warning C4820: '<unnamed-tag>': '4' bytes padding added after data member 'max_tokens'
+I:\RPL\mbed-benchtest\RTXOff\rtxoff_os.h(232,38): warning C4820: '<unnamed-tag>': '4' bytes padding added after data member 'block_size'
+I:\RPL\mbed-benchtest\RTXOff\rtxoff_os.h(243,38): warning C4820: '<unnamed-tag>': '4' bytes padding added after data member 'reserved'
+I:\RPL\mbed-benchtest\RTXOff\rtxoff_os.h(257,38): warning C4820: 'osRtxMessage_s': '4' bytes padding added after data member 'priority'
+I:\RPL\mbed-benchtest\RTXOff\rtxoff_os.h(267,38): warning C4820: '<unnamed-tag>': '4' bytes padding added after data member 'reserved'
+I:\RPL\mbed-benchtest\RTXOff\rtxoff_os.h(285,38): warning C4820: '<unnamed-tag>': '4' bytes padding added after data member 'reserved'
+I:\RPL\mbed-benchtest\RTXOff\cmsis_os.h(349,37): warning C4820: 'os_messageQ_def': '4' bytes padding added after data member 'queue_sz'
+I:\RPL\mbed-benchtest\RTXOff\cmsis_os.h(378,10): warning C4820: '<unnamed-tag>': '4' bytes padding added after data member 'status'
+I:\RPL\mbed-benchtest\RTXOff\arm-cmsis-rtos-validator\Include\RV_Report.h(34,1): warning C4820: '<unnamed-tag>': '4' bytes padding added after data member 'line'
+I:\RPL\mbed-benchtest\RTXOff\arm-cmsis-rtos-validator\Include\RV_Report.h(57,17): warning C4820: '<unnamed-tag>': '4' bytes padding added after data member 'warnings'
+I:\RPL\mbed-benchtest\RTXOff\arm-cmsis-rtos-validator\Include\RV_Report.h(67,23): warning C4820: '<unnamed-tag>': '4' bytes padding added after data member 'warnings'
+I:\RPL\mbed-benchtest\RTXOff\arm-cmsis-rtos-validator\Include\RV_Framework.h(25,1): warning C4820: '__TestCase': '7' bytes padding added after data member 'en'
+I:\RPL\mbed-benchtest\RTXOff\arm-cmsis-rtos-validator\Include\RV_Framework.h(36,16): warning C4820: '__TestSuite': '4' bytes padding added after data member 'TCBaseNum'
+I:\RPL\mbed-benchtest\RTXOff\arm-cmsis-rtos-validator\Include\RV_Framework.h(39,1): warning C4820: '__TestSuite': '4' bytes padding added after data member 'NumOfTC'
+I:\RPL\mbed-benchtest\RTXOff\arm-cmsis-rtos-validator\Source\RV_Framework.c(90): warning C5045: Compiler will insert Spectre mitigation for memory load if /Qspectre switch specified
+I:\RPL\mbed-benchtest\RTXOff\arm-cmsis-rtos-validator\Source\RV_Framework.c(85): message : index 'tc' range checked by comparison on this line
+I:\RPL\mbed-benchtest\RTXOff\arm-cmsis-rtos-validator\Source\RV_Framework.c(90): message : feeds call on this line
+I:\RPL\mbed-benchtest\RTXOff\arm-cmsis-rtos-validator\Source\RV_Framework.c(88): warning C5045: Compiler will insert Spectre mitigation for memory load if /Qspectre switch specified
+I:\RPL\mbed-benchtest\RTXOff\arm-cmsis-rtos-validator\Source\RV_Framework.c(85): message : index 'tc' range checked by comparison on this line
+I:\RPL\mbed-benchtest\RTXOff\arm-cmsis-rtos-validator\Source\RV_Framework.c(88): message : feeds call on this line
+  cmsis_rtos_validator.vcxproj -> I:\RPL\mbed-benchtest\build-msvc\RTXOff\arm-cmsis-rtos-validator\Debug\cmsis_rtos_validator.exe

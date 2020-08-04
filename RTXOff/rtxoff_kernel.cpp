@@ -62,7 +62,14 @@ osKernelState_t osKernelGetState (void)
 __NO_RETURN void osRtxIdleThread(void *argument)
 {
 	while(true)
-	{}
+	{
+
+	}
+}
+
+void rtxOffDefaultIdleFunc()
+{
+	// do nothing;
 }
 
 /// Start the RTOS Kernel scheduler.

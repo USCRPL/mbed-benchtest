@@ -133,7 +133,10 @@ public:
 	std::chrono::steady_clock::time_point lastTickTime;
 	std::chrono::milliseconds tickDuration = std::chrono::milliseconds(OS_TICK_PERIOD_MS);
 
-
+	struct
+	{
+		void (*idle_hook)() = rtxOffDefaultIdleFunc;  // Call this function in the idle thread.  Should never be nullptr.
+	} hooks;
 
 #if USE_WINTHREAD
 	// Kernel mode condition var.

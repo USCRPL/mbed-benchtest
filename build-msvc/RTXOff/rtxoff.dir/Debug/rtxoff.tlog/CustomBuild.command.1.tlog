@@ -1,0 +1,10 @@
+^I:\RPL\MBED-BENCHTEST\RTXOFF\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SI:/RPL/mbed-benchtest -BI:/RPL/mbed-benchtest/build-msvc --check-stamp-file I:/RPL/mbed-benchtest/build-msvc/RTXOff/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

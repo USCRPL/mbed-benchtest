@@ -14,6 +14,9 @@
 // RTXOff Debugging (to cerr, so that it is in correct order)
 #define RTXOFF_DEBUG 0
 
+// Kernel functions
+void rtxOffDefaultIdleFunc();
+
 // Thread Library functions
 void printThreadLL(osRtxThread_t * head);
 osRtxThread_t *osRtxThreadListGet(osRtxObject_t *object);

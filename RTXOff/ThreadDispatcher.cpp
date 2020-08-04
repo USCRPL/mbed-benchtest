@@ -236,6 +236,11 @@ bool ThreadDispatcher::updateTick()
 		// note: duration_cast always rounds down.
 		kernel.tick += duration_cast<milliseconds>(timeDelta).count();
 		lastTickTime += duration_cast<milliseconds>(timeDelta);
+		return true;
+	}
+	else
+	{
+		return false;
 	}
 }
 
