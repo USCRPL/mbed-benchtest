@@ -115,16 +115,7 @@ static bool mbed_error_is_handler(const mbed_error_ctx *ctx)
 {
     bool is_handler = false;
     if (ctx && mbed_error_is_hw_fault(ctx->error_status)) {
-        mbed_fault_context_t *mfc = (mbed_fault_context_t *)ctx->error_value;
-#ifdef TARGET_CORTEX_M
-        if (mfc && !(mfc->EXC_RETURN & 0x8)) {
-            is_handler = true;
-        }
-#elif defined TARGET_CORTEX_A
-        if (mfc && (mfc->CPSR & 0x1F) != 0x10) {
-            is_handler = true;
-        }
-#endif
+
     }
     return is_handler;
 }
@@ -147,17 +138,16 @@ static mbed_error_status_t handle_error(mbed_error_status_t error_status, unsign
     //Capture error information
     current_error_ctx.error_status = error_status;
     current_error_ctx.error_value = error_value;
-    mbed_fault_context_t *mfc = NULL;
     if (mbed_error_is_hw_fault(error_status)) {
     } else {
-        current_error_ctx.error_address = (uint32_t)caller;
-        current_error_ctx.thread_current_sp = (uint32_t)&current_error_ctx; // Address local variable to get a stack pointer
+        current_error_ctx.error_address = (void*)caller;
+        current_error_ctx.thread_current_sp = (void*)&current_error_ctx; // Address local variable to get a stack pointer
     }
 
 #ifdef MBED_CONF_RTOS_PRESENT
     // Capture thread info in thread mode
     osRtxThread_t *current_thread = (osRtxThread_t *)osThreadGetId();
-    current_error_ctx.thread_id = (uint32_t)current_thread;
+    current_error_ctx.thread_id = (ptrdiff_t)current_thread;
 #endif //MBED_CONF_RTOS_PRESENT
 
 #if MBED_CONF_PLATFORM_ERROR_FILENAME_CAPTURE_ENABLED
@@ -590,7 +580,7 @@ static void print_error_report(const mbed_error_ctx *ctx, const char *error_msg,
             break;
     }
     mbed_error_puts(error_msg);
-    mbed_error_printf("\nLocation: 0x%" PRIX32, ctx->error_address);
+    mbed_error_printf("\nLocation: 0x%p", ctx->error_address);
 
     /* We print the filename passed in, not any filename in the context. This
      * avoids the console print for mbed_error being limited to the presence
@@ -608,9 +598,9 @@ static void print_error_report(const mbed_error_ctx *ctx, const char *error_msg,
     mbed_error_printf("\nError Value: 0x%" PRIX32, ctx->error_value);
 #ifdef MBED_CONF_RTOS_PRESENT
     bool is_handler = mbed_error_is_handler(ctx);
-    mbed_error_printf("\nCurrent Thread: %s%s Id: 0x%" PRIX32 " Entry: 0x%" PRIX32 " StackSize: 0x%" PRIX32 " StackMem: 0x%" PRIX32 " SP: 0x%" PRIX32 " ",
+    mbed_error_printf("\nCurrent Thread: %s%s Id: 0x%p Entry: 0x%" PRIX32 " StackSize: 0x%" PRIX32 " StackMem: 0x%" PRIX32 " SP: 0x%p ",
                       name_or_unnamed((osRtxThread_t *)ctx->thread_id), is_handler ? " <handler>" : "",
-                      ctx->thread_id, ctx->thread_entry_address, ctx->thread_stack_size, ctx->thread_stack_mem, ctx->thread_current_sp);
+					  (osRtxThread_t *)ctx->thread_id, ctx->thread_entry_address, ctx->thread_stack_size, ctx->thread_stack_mem, ctx->thread_current_sp);
 #endif
 
 #if MBED_STACK_DUMP_ENABLED

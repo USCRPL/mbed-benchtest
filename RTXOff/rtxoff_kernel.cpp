@@ -63,7 +63,7 @@ __NO_RETURN void osRtxIdleThread(void *argument)
 {
 	while(true)
 	{
-
+		ThreadDispatcher::instance().hooks.idle_hook();
 	}
 }
 

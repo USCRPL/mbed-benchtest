@@ -7,12 +7,7 @@
 #ifndef __RV_CONFIG_H
 #define __RV_CONFIG_H
 
-//#include "ARMCM3.h"
-
-// Test case config
-#define RTE_RV_THREAD
-#define RTE_RV_SIGNAL
-#define RTE_RV_MUTEX
+#include "RTE_Components.h"
 
 // <h> Common Test Settings
 // <o> Print Output Format <0=> Plain Text <1=> XML

@@ -127,7 +127,7 @@ osMutexId osMutexCreate (const osMutexDef_t *mutex_def) {
 }
 #endif
 
-/*
+
 // Semaphore
 
 #if (defined (osFeature_Semaphore) && (osFeature_Semaphore != 0U)) && !defined(os1_Disable_Semaphore)
@@ -160,7 +160,7 @@ int32_t osSemaphoreWait (osSemaphoreId semaphore_id, uint32_t millisec) {
 
 #endif  // Semaphore
 
-
+/*
 // Memory Pool
 
 #if (defined(osFeature_Pool) && (osFeature_Pool != 0))&& !defined(os1_Disable_Pool)

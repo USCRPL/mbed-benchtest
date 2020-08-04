@@ -24,7 +24,7 @@ osThreadId Var_ThreadId;
 void Th_ChildSignals (void *arg);
 
 /* Definitions for TC_SignalChildToParent */
-#define SIG_FLAG_MSK ((1 << osFeature_Signals) - 1) /* Signal flag mask       */
+#define SIG_FLAG_MSK 0x7FFFFFFF /* Signal flag mask       */
 
 void Th_Sig (void const *arg);          /* Signaling thread prototype         */
 

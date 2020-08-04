@@ -218,6 +218,14 @@ public:
 	 * Call this from an RTX thread. Requests a schedule, yields to the scheduler thread,
 	 * and doesn't return until unless it's the current running thread.
 	 *
+	 * You should generally call this at the end of any function that calls switchNextThread(),
+	 * of any function that calls it such as dispatch() and osRtxThreadWaitExit().  However
+	 * you should only call it if the current thread has changed since the start of the function.
+	 * Failure to call this when needed will generally cause the scheduler's internal data to become
+	 * corrupted (since the same thread will be added to the ready list twice) and lead to a hang or
+	 * crash.  Don't blame me, blame the RTX people deciding to reimplement the
+	 * linked list in a haphazard way!
+	 *
 	 * Expects to be called with the kernel mode mutex locked.
 	 */
 	void blockUntilWoken();

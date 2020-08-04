@@ -833,13 +833,13 @@ typedef enum _mbed_error_code {
  */
 typedef struct _mbed_error_ctx {
     mbed_error_status_t error_status;
-    uint32_t error_address;
+    void* error_address;
     uint32_t error_value;
-    uint32_t thread_id;
+    ptrdiff_t thread_id;
     uint32_t thread_entry_address;
     uint32_t thread_stack_size;
     uint32_t thread_stack_mem;
-    uint32_t thread_current_sp;
+    void* thread_current_sp;
 #ifdef MBED_CONF_PLATFORM_MAX_ERROR_FILENAME_LEN
     char error_filename[MBED_CONF_PLATFORM_MAX_ERROR_FILENAME_LEN];
     uint32_t error_line_number;

@@ -4,6 +4,7 @@ set(CMSIS_RTOS_VALIDATOR_SOURCES
 	Source/RV_Mutex.c
 	Source/RV_Signal.c
 	Source/RV_Report.c
+	Source/RV_Semaphore.c
 	Source/RV_Framework.c)
 
 add_executable(cmsis_rtos_validator ${CMSIS_RTOS_VALIDATOR_SOURCES})

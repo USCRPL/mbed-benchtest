@@ -31,6 +31,7 @@ set(RTX_OFF_SOURCES
 	rtxoff_mutex.cpp
 	rtxoff_delay.cpp
 	rtxoff_evflags.cpp
+	rtxoff_semaphore.cpp
 	ThreadDispatcher.cpp
 	ThreadDispatcher.h
 

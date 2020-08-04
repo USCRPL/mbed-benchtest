@@ -101,12 +101,16 @@ set(MBED_PLATFORM_SOURCES
 
 	drivers/MbedCRC.h
 
+	rtos/ConditionVariable.h
+	rtos/ConditionVariable.cpp
 	rtos/EventFlags.h
 	rtos/EventFlags.cpp
 	rtos/Kernel.h
 	rtos/Kernel.cpp
 	rtos/Mutex.h
 	rtos/Mutex.cpp
+	rtos/Semaphore.h
+	rtos/Semaphore.cpp
 	rtos/ThisThread.h
 	rtos/ThisThread.cpp
 	rtos/Thread.h
