@@ -1,4 +1,0 @@
-I:/RPL/mbed-benchtest/build-msvc/CMakeFiles/ALL_BUILD.dir
-I:/RPL/mbed-benchtest/build-msvc/CMakeFiles/ZERO_CHECK.dir
-I:/RPL/mbed-benchtest/build-msvc/RTXOff/CMakeFiles/rtxoff.dir
-I:/RPL/mbed-benchtest/build-msvc/RTXOff/arm-cmsis-rtos-validator/CMakeFiles/cmsis_rtos_validator.dir
