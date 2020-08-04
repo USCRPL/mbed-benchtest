@@ -49,7 +49,6 @@
 #include <mstd_tuple>
 #include <chrono>
 
-#include "mbed_atomic.h"
 #include "mbed_assert.h"
 
 extern "C" int __cxa_guard_acquire(int *guard_object_p);
@@ -363,6 +362,8 @@ private:
     int __guard;
 };
 
+// note: below function not implemented yet in mbed-testbench
+/**
 // [thread.once.callonce]
 template <class Callable, class... Args>
 void call_once(once_flag &flag, Callable&& f, Args&&... args)
@@ -374,6 +375,7 @@ void call_once(once_flag &flag, Callable&& f, Args&&... args)
         }
     }
 }
+*/
 
 // [thread.mutex.class]
 // Always local implementation - need to investigate GCC + ARMC6 retargetting

@@ -34,9 +34,20 @@
 #define DEVICE_USBDEVICE 1
 #define DEVICE_USTICKER 1
 #define DEVICE_WATCHDOG 1
+#define __MBED_CMSIS_RTOS_CM 1
+#define __MBED__ 1
 
 #define MBED_CONF_RTOS_API_PRESENT 1
 #define MBED_CONF_RTOS_PRESENT 1
+
+#define EQUEUE_PLATFORM_MBED 1
+#define MBED_CONF_EVENTS_PRESENT                                          1                                       // set by library:events
+#define MBED_CONF_EVENTS_SHARED_DISPATCH_FROM_APPLICATION                 0                                       // set by library:events
+#define MBED_CONF_EVENTS_SHARED_EVENTSIZE                                 768                                     // set by library:events
+#define MBED_CONF_EVENTS_SHARED_HIGHPRIO_EVENTSIZE                        256                                     // set by library:events
+#define MBED_CONF_EVENTS_SHARED_HIGHPRIO_STACKSIZE                        1024                                    // set by library:events
+#define MBED_CONF_EVENTS_SHARED_STACKSIZE                                 2048                                    // set by library:events
+#define MBED_CONF_EVENTS_USE_LOWPOWER_TIMER_TICKER                        0
 
 #define MBED_CONF_PLATFORM_CALLBACK_COMPARABLE                            1                                       // set by library:platform
 #define MBED_CONF_PLATFORM_CALLBACK_NONTRIVIAL                            0                                       // set by library:platform

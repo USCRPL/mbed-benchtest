@@ -101,6 +101,11 @@ set(MBED_PLATFORM_SOURCES
 
 	drivers/MbedCRC.h
 
+	events/source/equeue.c
+	events/source/equeue_mbed.cpp
+	events/source/EventQueue.cpp
+	events/source/mbed_shared_queues.cpp
+
 	rtos/ConditionVariable.h
 	rtos/ConditionVariable.cpp
 	rtos/EventFlags.h
@@ -118,5 +123,12 @@ set(MBED_PLATFORM_SOURCES
 
 add_library(mbed_platform ${MBED_PLATFORM_SOURCES})
 target_link_libraries(mbed_platform rtxoff)
-target_include_directories(mbed_platform PUBLIC . platform platform/cxxsupport drivers fake_device rtos)
+target_include_directories(mbed_platform PUBLIC
+	.
+	platform
+	platform/cxxsupport
+	drivers
+	events
+	fake_device
+	rtos)
 target_compile_options(mbed_platform PUBLIC -include ${CMAKE_CURRENT_SOURCE_DIR}/mbed-conf-benchtest.h)

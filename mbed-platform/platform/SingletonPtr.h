@@ -21,7 +21,7 @@
 #include <stdint.h>
 #include <new>
 #include "platform/mbed_assert.h"
-#include "platform/mbed_atomic.h"
+#include "platform/mbed_critical.h"
 #ifdef MBED_CONF_RTOS_PRESENT
 #include "cmsis_os2.h"
 #endif
@@ -124,20 +124,22 @@ struct SingletonPtr {
      */
     T *get() const
     {
-        T *p = core_util_atomic_load(&_ptr);
+    	core_util_critical_section_enter();
+        T *p = _ptr;
         if (p == NULL) {
             singleton_lock();
             p = _ptr;
             if (p == NULL) {
                 p = new (_data) T();
-                core_util_atomic_store(&_ptr, p);
+                _ptr = p;
             }
             singleton_unlock();
         }
         // _ptr was not zero initialized or was
         // corrupted if this assert is hit
         MBED_ASSERT(p == reinterpret_cast<T *>(&_data));
-        return p;
+		core_util_critical_section_exit();
+		return p;
     }
 
     /** Get a pointer to the underlying singleton

@@ -18,7 +18,6 @@
 #define MBED_WAIT_API_H
 
 #include "platform/mbed_toolchain.h"
-#include "platform/mbed_atomic.h"
 #include "device.h"
 
 #ifdef __cplusplus
