@@ -30,16 +30,7 @@
 #include <stddef.h>
 #include "cmsis_os2.h"
 
-// include OS threading library
-#if USE_WINTHREAD
-#  define WIN32_LEAN_AND_MEAN 1
-#  include <Windows.h>
-#else
-#  include <pthread.h>
-#  include <mutex>
-#  include <condition_variable>
-#  include <signal.h>
-#endif
+
 
 #ifdef  __cplusplus
 extern "C"
@@ -139,7 +130,7 @@ typedef struct osRtxThread_s {
 #if USE_WINTHREAD
   HANDLE osThread;
 #else
-#error TODO!
+  pthread_t osThread;
 #endif
 } osRtxThread_t;
  

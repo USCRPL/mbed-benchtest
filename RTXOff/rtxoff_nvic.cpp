@@ -38,7 +38,7 @@ void deliverNewInterrupt(InterruptData & interrupt, std::unique_lock<std::recurs
 #if USE_WINTHREAD
 			SwitchToThread();
 #else
-#error TODO
+            pthread_yield();
 #endif
 		}
 

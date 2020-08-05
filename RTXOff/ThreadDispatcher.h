@@ -151,7 +151,15 @@ public:
 	// of calling osThreadNew().
 	CRITICAL_SECTION kernelDataMutex = {0};
 #else
-#error TODO
+    // Kernel mode condition var.
+    // Signaling this causes the OS to return from "user mode" to "kernel mode",
+    // and begin executing the thread switcher.
+    pthread_cond_t kernelModeCondVar;
+
+    // Kernel data mutex.  Must be held by any thread accessing or changing this class.
+    // This prevents e.g. a timer tick happening when an RTX thread is in the middle
+    // of calling osThreadNew().
+    pthread_mutex_t  kernelDataMutex;
 #endif
 
 	// create an instance of one of these objects

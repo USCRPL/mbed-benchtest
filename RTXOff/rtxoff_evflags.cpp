@@ -77,7 +77,7 @@ static void osRtxEventFlagsPostProcess (osRtxEventFlags_t * ef)
 		event_flags = EventFlagsCheck(ef, thread->wait_flags, thread->flags_options);
 		if (event_flags != 0U) {
 			osRtxThreadListRemove(thread);
-			osRtxThreadWaitExit(thread, event_flags, FALSE);
+			osRtxThreadWaitExit(thread, event_flags, false);
 		}
 		thread = thread_next;
 	}
@@ -185,7 +185,7 @@ uint32_t osEventFlagsSet (osEventFlagsId_t ef_id, uint32_t flags)
 					event_flags = event_flags0;
 				}
 				osRtxThreadListRemove(thread);
-				osRtxThreadWaitExit(thread, event_flags0, FALSE);
+				osRtxThreadWaitExit(thread, event_flags0, false);
 			}
 			thread = thread_next;
 		}
@@ -311,7 +311,7 @@ osStatus_t osEventFlagsDelete (osEventFlagsId_t ef_id)
 	{
 		do {
 			thread = osRtxThreadListGet(reinterpret_cast<osRtxObject_t *>(ef));
-			osRtxThreadWaitExit(thread, (uint32_t)osErrorResource, FALSE);
+			osRtxThreadWaitExit(thread, (uint32_t)osErrorResource, false);
 		} while (ef->thread_list != NULL);
 		ThreadDispatcher::instance().dispatch(NULL);
 	}

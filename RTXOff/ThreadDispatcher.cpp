@@ -2,6 +2,7 @@
 
 #include <system_error>
 #include <thread>
+#include <cstring>
 
 ThreadDispatcher::Mutex::Mutex()
 {
@@ -123,7 +124,49 @@ void ThreadDispatcher::requestSchedule()
 	WakeConditionVariable(&kernelModeCondVar);
 }
 #else
-#error TODO
+
+ThreadDispatcher::ThreadDispatcher()
+{
+    // initialize kernel mode mutex
+    pthread_mutexattr_t recursiveAttr;
+    pthread_mutexattr_init(&recursiveAttr);
+    pthread_mutexattr_settype(&recursiveAttr, PTHREAD_MUTEX_RECURSIVE);
+
+    pthread_mutex_init(&kernelDataMutex, &recursiveAttr);
+
+    pthread_mutexattr_destroy(&recursiveAttr);
+
+    // initialize kernel mode cond var
+    pthread_cond_init(&kernelModeCondVar, nullptr);
+}
+
+void ThreadDispatcher::lockMutex()
+{
+    int pthread_errorcode = pthread_mutex_lock(&kernelDataMutex);
+    if(pthread_errorcode != 0)
+    {
+        std::cerr << "Error locking kernel mutex: " << std::system_category().message(pthread_errorcode) << std::endl;
+    }
+}
+
+void ThreadDispatcher::unlockMutex()
+{
+    int pthread_errorcode = pthread_mutex_unlock(&kernelDataMutex);
+    if(pthread_errorcode != 0)
+    {
+        std::cerr << "Error unlocking kernel mutex: " << std::system_category().message(pthread_errorcode) << std::endl;
+    }
+}
+
+void ThreadDispatcher::requestSchedule()
+{
+    int pthread_errorcode = pthread_cond_signal(&kernelModeCondVar);
+    if(pthread_errorcode != 0)
+    {
+        std::cerr << "Error signaling kernel mode cond var: " << std::system_category().message(pthread_errorcode) << std::endl;
+    }
+}
+
 #endif
 
 void ThreadDispatcher::switchNextThread(osRtxThread_t * nextThread)
@@ -233,7 +276,7 @@ void ThreadDispatcher::blockUntilWoken()
 #if USE_WINTHREAD
 		SwitchToThread();
 #else
-#error TODO
+        pthread_yield();
 #endif
 	}
 

@@ -38,7 +38,7 @@ set(RTX_OFF_SOURCES
 	rtxoff_clock.cpp
 
 	# program entry point
-	rtxoff_main.cpp )
+	rtxoff_main.cpp thread_suspender.h)
 
 add_library(rtxoff STATIC ${RTX_OFF_SOURCES})
 target_link_libraries(rtxoff)
@@ -51,7 +51,7 @@ if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
 	# use the Windows 7 API version
 	target_compile_definitions(rtxoff PUBLIC _WIN32_WINNT=0x601)
 else()
-	target_compile_definitions(rtxoff PUBLIC USE_WINTHREAD=0)
+	target_compile_definitions(rtxoff PUBLIC USE_WINTHREAD=0 _GNU_SOURCE=1)
 endif()
 
 # manually apply mbed configs

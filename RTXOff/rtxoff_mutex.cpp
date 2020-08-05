@@ -22,7 +22,7 @@ void osRtxMutexOwnerRelease (osRtxMutex_t *mutex_list)
 			if (mutex->thread_list != nullptr) {
 				// Wakeup waiting Thread with highest Priority
 				thread = osRtxThreadListGet(reinterpret_cast<osRtxObject_t *>(mutex));
-				osRtxThreadWaitExit(thread, (uint32_t)osOK, FALSE);
+				osRtxThreadWaitExit(thread, (uint32_t)osOK, false);
 				// Thread is the new Mutex owner
 				mutex->owner_thread = thread;
 				mutex->owner_prev   = nullptr;
@@ -402,7 +402,7 @@ osStatus_t osMutexDelete (osMutexId_t mutex_id)
 		// Unblock waiting threads
 		while (mutex->thread_list != NULL) {
 			thread = osRtxThreadListGet(reinterpret_cast<osRtxObject_t *>(mutex));
-			osRtxThreadWaitExit(thread, (uint32_t)osErrorResource, FALSE);
+			osRtxThreadWaitExit(thread, (uint32_t)osErrorResource, false);
 		}
 
 		// at this point a new thread might potentially take over

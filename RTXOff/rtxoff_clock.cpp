@@ -27,6 +27,18 @@ RTXClock::time_point RTXClock::now()
 }
 
 #else
-#error TODO
+
+#include <ctime>
+
+RTXClock::time_point RTXClock::now()
+{
+    struct timespec processTime;
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &processTime);
+
+    return time_point(
+            duration_cast<microseconds>(seconds(processTime.tv_sec)) +
+            duration_cast<microseconds>(nanoseconds(processTime.tv_nsec)));
+}
+
 #endif
 #endif

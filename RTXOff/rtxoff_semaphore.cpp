@@ -53,7 +53,7 @@ static void osRtxSemaphorePostProcess (osRtxSemaphore_t *semaphore) {
 		if (SemaphoreTokenDecrement(semaphore) != 0U) {
 			// Wakeup waiting Thread with highest Priority
 			thread = osRtxThreadListGet(reinterpret_cast<osRtxObject_t *>((semaphore)));
-			osRtxThreadWaitExit(thread, (uint32_t)osOK, FALSE);
+			osRtxThreadWaitExit(thread, (uint32_t)osOK, false);
 		}
 	}
 }
@@ -271,7 +271,7 @@ osStatus_t osSemaphoreDelete (osSemaphoreId_t semaphore_id)
 	{
 		do {
 			thread = osRtxThreadListGet(reinterpret_cast<osRtxObject_t *>(semaphore));
-			osRtxThreadWaitExit(thread, (uint32_t)osErrorResource, FALSE);
+			osRtxThreadWaitExit(thread, (uint32_t)osErrorResource, false);
 		} while (semaphore->thread_list != nullptr);
 		ThreadDispatcher::instance().dispatch(nullptr);
 	}
