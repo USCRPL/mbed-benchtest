@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdio.h>
 
 // check if the event is allocaded by user - event address is outside queues internal buffer address range
 #define EQUEUE_IS_USER_ALLOCATED_EVENT(e) ((q->buffer == NULL) || ((uintptr_t)(e) < (uintptr_t)q->buffer) || ((uintptr_t)(e) > ((uintptr_t)q->slab.data)))
@@ -492,17 +493,21 @@ void equeue_break(equeue_t *q)
 void equeue_dispatch(equeue_t *q, int ms)
 {
     unsigned tick = equeue_tick();
-    unsigned timeout = tick + ms;
+	printf("Beginning dispatch, tick = %u\n", tick);
+	unsigned timeout = tick + ms;
     q->background.active = false;
 
     while (1) {
-        // collect all the available events and next deadline
+		printf("Checking events, tick = %u\n", tick);
+		// collect all the available events and next deadline
         struct equeue_event *es = equeue_dequeue(q, tick);
 
         // dispatch events
         while (es) {
             struct equeue_event *e = es;
             es = e->next;
+
+            printf("Tick = %u, dispatching event with target time %u\n", tick, e->target);
 
             // actually dispatch the callbacks
             void (*cb)(void *) = e->cb;
@@ -556,7 +561,9 @@ void equeue_dispatch(equeue_t *q, int ms)
         equeue_mutex_unlock(&q->queuelock);
 
         // wait for events
-        equeue_sema_wait(&q->eventsema, deadline);
+		printf("Waiting for sema, tick = %u\n", equeue_tick());
+		equeue_sema_wait(&q->eventsema, deadline);
+		printf("Waiting for sema, tick = %u\n", equeue_tick());
 
         // check if we were notified to break out of dispatch
         if (q->break_requested) {

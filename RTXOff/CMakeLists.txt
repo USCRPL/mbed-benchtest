@@ -34,9 +34,11 @@ set(RTX_OFF_SOURCES
 	rtxoff_semaphore.cpp
 	ThreadDispatcher.cpp
 	ThreadDispatcher.h
+	rtxoff_clock.h
+	rtxoff_clock.cpp
 
 	# program entry point
-	rtxoff_main.cpp)
+	rtxoff_main.cpp )
 
 add_library(rtxoff STATIC ${RTX_OFF_SOURCES})
 target_link_libraries(rtxoff)

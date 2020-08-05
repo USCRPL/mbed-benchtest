@@ -69,7 +69,7 @@ __NO_RETURN void osRtxIdleThread(void *argument)
 
 void rtxOffDefaultIdleFunc()
 {
-	// do nothing;
+	// do nothing
 }
 
 /// Start the RTOS Kernel scheduler.
@@ -126,26 +126,15 @@ uint32_t osKernelGetTickFreq (void) {
 }
 
 /// Get the RTOS kernel system timer count.
+/// This should be finer grain than the tick count.
 uint32_t osKernelGetSysTimerCount (void) {
-	// combine the time since the last tick, and the total number of ticks.
-	ThreadDispatcher::Mutex mutex;
-
-	using namespace std::chrono;
-
-	// get time from ticks
-	auto ticksTime = milliseconds(ThreadDispatcher::instance().kernel.tick);
-
-	// also get time since the last tick
-	auto fractionalTick = steady_clock::now() - ThreadDispatcher::instance().lastTickTime;
-
-	// combine the two to get a more accurate time
-	return (duration_cast<steady_clock::duration>(ticksTime) + fractionalTick).count();
+	return RTXClock::now().time_since_epoch().count();
 }
 
 /// Get the RTOS kernel system timer frequency.
 uint32_t osKernelGetSysTimerFreq (void)
 {
-	typedef std::chrono::steady_clock::duration::period clockTickRatio;
+	typedef RTXClock::duration::period clockTickRatio;
 
 	// take the inverse of the clock tick period
 	return clockTickRatio::den / clockTickRatio::num;

@@ -196,10 +196,10 @@ void ThreadDispatcher::onTick()
 		}
 		else
 		{
-			if (thread.robin.tick != 0U) {
-				thread.robin.tick--;
+			if (thread.robin.tick != 0) {
+				thread.robin.tick -= kernel.tickDelta;
 			}
-			if (thread.robin.tick == 0U) {
+			if (thread.robin.tick <= 0) {
 				// Round Robin Timeout
 				if (kernel.state == osRtxKernelRunning)
 				{
@@ -244,11 +244,12 @@ bool ThreadDispatcher::updateTick()
 {
 	using namespace std::chrono;
 
-	auto nowTime = steady_clock::now();
+	auto nowTime = RTXClock::now();
 	auto timeDelta = nowTime - lastTickTime;
 	if(timeDelta >= tickDuration)
 	{
 		// note: duration_cast always rounds down.
+		kernel.tickDelta = duration_cast<milliseconds>(timeDelta).count();
 		kernel.tick += duration_cast<milliseconds>(timeDelta).count();
 		lastTickTime += duration_cast<milliseconds>(timeDelta);
 		return true;
@@ -413,9 +414,9 @@ void ThreadDispatcher::delayListTick()
 		return;
 	}
 
-	delayTopThread->delay--;
+	delayTopThread->delay -= kernel.tickDelta;
 
-	if (delayTopThread->delay == 0U)
+	if (delayTopThread->delay <= 0)
 	{
 		do {
 			switch (delayTopThread->state) {
@@ -442,12 +443,20 @@ void ThreadDispatcher::delayListTick()
 					break;
 			}
 #if RTXOFF_DEBUG
-			std::cerr << delayTopThread->name << " has finished its waiting period, moving to ready list" << std::endl;
+			std::cerr << delayTopThread->name << " has finished its waiting period at tick " << kernel.tick << ", moving to ready list" << std::endl;
 #endif
 			osRtxThreadListRemove(delayTopThread);
 			osRtxThreadReadyPut(delayTopThread);
+
+			// proxy a negative delay value onto the next thread
+			if(delayTopThread->delay_next != nullptr)
+			{
+				delayTopThread->delay_next->delay += delayTopThread->delay;
+			}
+
 			delayTopThread = delayTopThread->delay_next;
-		} while ((delayTopThread != NULL) && (delayTopThread->delay == 0U));
+
+		} while ((delayTopThread != NULL) && (delayTopThread->delay <= 0));
 		if (delayTopThread != NULL) {
 			delayTopThread->delay_prev = NULL;
 		}

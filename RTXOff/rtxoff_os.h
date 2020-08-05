@@ -124,7 +124,7 @@ typedef struct osRtxThread_s {
   struct osRtxThread_s    *delay_next;  ///< Link pointer to next Thread in Delay list
   struct osRtxThread_s    *delay_prev;  ///< Link pointer to previous Thread in Delay list
   struct osRtxThread_s   *thread_join;  ///< Thread waiting to join until this thread finishes
-  uint32_t                      delay;  ///< Delay Time.  When in delay list, this gives the ADDITIONAL delay time from the previous thread.
+  int64_t                      delay;  ///< Delay Time.  When in delay list, this gives the ADDITIONAL delay time from the previous thread.
   int8_t                     priority;  ///< Thread Priority  Effective priority accounting for mutexes the thread holds.
   int8_t                priority_base;  ///< Base Priority.  Priority that the thread was set to.
   uint8_t                 stack_frame;  ///< Stack Frame (EXC_RETURN[7..0])

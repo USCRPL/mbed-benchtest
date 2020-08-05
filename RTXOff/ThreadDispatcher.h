@@ -7,6 +7,7 @@
 
 #include "rtxoff_internal.h"
 #include "rtxoff_nvic.h"
+#include "rtxoff_clock.h"
 
 #include "RTX_Config.h"
 
@@ -65,6 +66,7 @@ public:
 		uint8_t                    pendSV;  ///< Pending SV
 		uint8_t                  reserved;
 		uint32_t                     tick = 0;  ///< Tick counter
+		uint32_t 					tickDelta = 0; // Delta in ticks since the last tick occurred.
 	} kernel;
 
 	// Thread data, same as RTX
@@ -90,7 +92,7 @@ public:
 		osRtxThread_t     *terminate_list;  ///< Terminate Thread List
 		struct {                            ///< Thread Round Robin Info
 			osRtxThread_t           *thread = nullptr;  ///< Round Robin Thread
-			uint32_t                   tick = 0;  ///< Round Robin Time Tick
+			int64_t                   tick = 0;  ///< Round Robin Time Tick
 			uint32_t                timeout = OS_ROBIN_TIMEOUT;  ///< Round Robin Timeout
 		} robin;
 	} thread;
@@ -130,7 +132,7 @@ public:
 
 	// Time of the last system tick.  Once the clock time goes one tick period past this,
 	// we call the tick handler.
-	std::chrono::steady_clock::time_point lastTickTime;
+	RTXClock::time_point lastTickTime;
 	std::chrono::milliseconds tickDuration = std::chrono::milliseconds(OS_TICK_PERIOD_MS);
 
 	struct

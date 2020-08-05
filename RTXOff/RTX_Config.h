@@ -27,19 +27,21 @@
  
 #ifndef RTX_CONFIG_H_
 #define RTX_CONFIG_H_
- 
-#ifdef   _RTE_
-#include "RTE_Components.h"
-#ifdef    RTE_RTX_CONFIG_H
-#include  RTE_RTX_CONFIG_H
-#endif
-#endif
- 
-//-------- <<< Use Configuration Wizard in Context Menu >>> --------------------
- 
+
 // <h>System Configuration
 // =======================
- 
+
+// RTXOff clock configuration.
+// Define to 1 to use the process CPU clock as the kernel tick counter.
+// In this mode, wait times will be much more accurate since time won't pass when the process is not running.
+// However, time will pass slower for your program than in the real world.
+// Define to 0 to use the system monotonic clock as the kernel tick counter.
+// Timer ticks in your program will occur at the correct real world rate.  However, time will appear to
+// "jump" forward tens of milliseconds at a time at points where your program is switched away from.
+#ifndef RTXOFF_USE_PROCESS_CLOCK
+#define RTXOFF_USE_PROCESS_CLOCK 1
+#endif
+
 //   <o>Global Dynamic Memory size [bytes] <0-1073741824:8>
 //   <i> Defines the combined global dynamic memory size.
 //   <i> Default: 32768
@@ -50,6 +52,7 @@
 //   <o>Kernel Tick Frequency [Hz] <1-1000000>
 //   <i> Defines base time unit for delays and timeouts.
 //   <i> Default: 1000 (1ms tick)
+//   Note: This is in real time and is unaffected by RTXOFF_USE_PROCESS_CLOCK
 #ifndef OS_TICK_FREQ
 #define OS_TICK_FREQ                1000
 #endif

@@ -79,7 +79,7 @@ static void timing_func(void *p)
 
     unsigned t1 = timing->delay;
     unsigned t2 = tick - timing->tick;
-    TEST_ASSERT_UINT_WITHIN(10, t2, t1);
+    TEST_ASSERT_UINT_WITHIN(20, t2, t1);
 
     timing->tick = tick;
 }
