@@ -104,6 +104,18 @@ public:
     {
     }
 
+    // copy constructor
+    UserAllocatedEvent(const events::UserAllocatedEvent<F, void(ArgTs...)>& other):
+	_e(other._e),
+	_c(other._c),
+	_delay(other._delay),
+	_period(other._period),
+	_equeue(other._equeue),
+	_post_ref(other._post_ref.load())
+	{
+
+	}
+
     /** Destructor for events
      */
 #if !defined(NDEBUG)

@@ -55,6 +55,11 @@ namespace v1 {
         STATUS_ABORT = -3       ///< stops testing
     };
 
+    // REASON_UNKNOWN is a macro on MinGW
+#ifdef REASON_UNKNOWN
+#undef REASON_UNKNOWN
+#endif
+
     /// failure_reason_t
     enum failure_reason_t {
         REASON_NONE          = 0,           ///< No failure occurred

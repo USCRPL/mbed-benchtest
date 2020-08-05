@@ -23,5 +23,5 @@ set(UTEST_SOURCES
 	)
 
 add_library(utest ${UTEST_SOURCES})
-target_include_directories(utest PUBLIC .)
+target_include_directories(utest PUBLIC . utest)
 target_link_libraries(utest greentea-client mbed_platform)

@@ -5,5 +5,5 @@ set(UNITY_SOURCES
 	unity/unity_internals.h)
 
 add_library(unity ${UNITY_SOURCES})
-target_include_directories(unity PUBLIC .)
+target_include_directories(unity PUBLIC . unity)
 target_link_libraries(unity utest mbed_platform)
