@@ -54,5 +54,3 @@ endif()
 
 # manually apply mbed configs
 target_compile_definitions(rtxoff PUBLIC MBED_CONF_RTOS_PRESENT=1)
-
-add_subdirectory(arm-cmsis-rtos-validator)

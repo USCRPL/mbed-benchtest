@@ -248,11 +248,10 @@ uint32_t Thread::stack_size() const
     uint32_t size = 0;
     _mutex.lock();
 
-    if (_tid != nullptr) {
-        size = osThreadGetStackSize(_tid);
-    }
+	// not implemented in RTXOff
 
-    _mutex.unlock();
+
+	_mutex.unlock();
     return size;
 }
 

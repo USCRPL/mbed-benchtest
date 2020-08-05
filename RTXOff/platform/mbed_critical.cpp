@@ -4,6 +4,7 @@
 
 #include <rtxoff_internal.h>
 #include <ThreadDispatcher.h>
+#include "mbed_critical.h"
 
 static uint32_t critical_section_reentrancy_counter = 0;
 
@@ -43,9 +44,11 @@ void core_util_critical_section_exit(void)
 
 	--critical_section_reentrancy_counter;
 
+	// this is a recursive mutex so we need to unlock it as many times as we locked it
+	ThreadDispatcher::instance().unlockMutex();
+
 	if (critical_section_reentrancy_counter == 0)
 	{
 		ThreadDispatcher::instance().interrupt.enabled = true;
-		ThreadDispatcher::instance().unlockMutex();
 	}
 }

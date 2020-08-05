@@ -100,6 +100,7 @@ set(MBED_PLATFORM_SOURCES
 	#platform/source/Stream.cpp
 
 	drivers/MbedCRC.h
+	drivers/MbedCRC.cpp
 
 	events/source/equeue.c
 	events/source/equeue_mbed.cpp

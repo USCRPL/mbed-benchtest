@@ -40,6 +40,7 @@ void ThreadDispatcher::dispatchForever()
 {
 	while(true)
 	{
+#if RTXOFF_DEBUG
 		// sanity check that thread is still running
 		DWORD exitCode;
 		GetExitCodeThread(thread.run.curr->osThread, &exitCode);
@@ -47,6 +48,7 @@ void ThreadDispatcher::dispatchForever()
 		{
 			std::cerr << "RTXOff Sanity Check Failure: thread " << thread.run.curr->name << " has finished execution but is still active according to RTX scheduler." << std::endl;
 		}
+#endif
 
 		// Dispatch the current thread
 		if(ResumeThread(thread.run.curr->osThread) < 0)
@@ -67,6 +69,19 @@ void ThreadDispatcher::dispatchForever()
 			{
 				std::cerr << "Error suspending RTX thread " << thread.run.curr->name << ": " << std::system_category().message(GetLastError()) << std::endl;
 			}
+		}
+
+		if(!interrupt.enabled)
+		{
+			// If interrupts are disabled, the scheduler can't run on the real processor.
+			// Emulate that by switching back immediately.
+
+			if(thread.run.curr == nullptr)
+			{
+				std::cerr << "RTXOFF Critical Error: Interrupts disabled but don't have a thread to run??" << std::endl;
+				exit(4);
+			}
+			continue;
 		}
 
 		if(thread.run.next != nullptr)

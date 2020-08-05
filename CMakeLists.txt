@@ -14,3 +14,4 @@ add_compile_options(-Wall)
 
 add_subdirectory(RTXOff)
 add_subdirectory(mbed-platform)
+add_subdirectory(tests)

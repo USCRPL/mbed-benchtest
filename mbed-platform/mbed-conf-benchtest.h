@@ -51,7 +51,7 @@
 
 #define MBED_CONF_PLATFORM_CALLBACK_COMPARABLE                            1                                       // set by library:platform
 #define MBED_CONF_PLATFORM_CALLBACK_NONTRIVIAL                            0                                       // set by library:platform
-#define MBED_CONF_PLATFORM_CRASH_CAPTURE_ENABLED                          1                                       // set by library:platform[NUCLEO_F429ZI]
+#define MBED_CONF_PLATFORM_CRASH_CAPTURE_ENABLED                          0                                       // set by library:platform[NUCLEO_F429ZI]
 #define MBED_CONF_PLATFORM_CTHUNK_COUNT_MAX                               8                                       // set by library:platform
 #define MBED_CONF_PLATFORM_DEFAULT_SERIAL_BAUD_RATE                       9600                                    // set by library:platform
 #define MBED_CONF_PLATFORM_ERROR_ALL_THREADS_INFO                         0                                       // set by library:platform
@@ -71,3 +71,7 @@
 #define MBED_CONF_PLATFORM_STDIO_CONVERT_TTY_NEWLINES                     1                                       // set by library:platform
 #define MBED_CONF_PLATFORM_STDIO_FLUSH_AT_EXIT                            1                                       // set by library:platform
 #define MBED_CONF_PLATFORM_STDIO_MINIMAL_CONSOLE_ONLY                     0
+#define MBED_CRC_TABLE_SIZE                                               16                                      // set by library:drivers
+
+// disable greentea communication protocol
+#define NO_GREENTEA 1

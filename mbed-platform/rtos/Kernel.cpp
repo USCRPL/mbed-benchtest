@@ -88,7 +88,8 @@ void Kernel::attach_idle_hook(void (*fptr)(void))
 
 void Kernel::attach_thread_terminate_hook(void (*fptr)(osThreadId_t id))
 {
-    rtos_attach_thread_terminate_hook(fptr);
+	// RTXOff TODO
+    //rtos_attach_thread_terminate_hook(fptr);
 }
 #endif
 

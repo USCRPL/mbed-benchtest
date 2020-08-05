@@ -110,7 +110,7 @@ public:
 		std::recursive_mutex mutex; // Seperate mutex to protect data in this struct.  OK to use std::mutex since we don't need special OS features.
 
 		// Whether interrupts are enabled for the simulated processor.
-		// Note: not protected by above mutex.
+		// Note: not protected by above mutex, but should only be modified by scheduler/RTOS threads.
 		bool enabled = true;
 	} interrupt;
 
