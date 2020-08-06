@@ -22,7 +22,7 @@
  */
 
 #include "rtos/Kernel.h"
-#include "rtos_idle.h"
+#include "rtos_hooks.h"
 #include "rtos_handlers.h"
 #include "platform/mbed_critical.h"
 
@@ -88,8 +88,7 @@ void Kernel::attach_idle_hook(void (*fptr)(void))
 
 void Kernel::attach_thread_terminate_hook(void (*fptr)(osThreadId_t id))
 {
-	// RTXOff TODO
-    //rtos_attach_thread_terminate_hook(fptr);
+    rtos_attach_thread_terminate_hook(fptr);
 }
 #endif
 

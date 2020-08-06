@@ -129,6 +129,11 @@ typedef struct osRtxThread_s {
 
   os_thread_id osThread;
   struct thread_suspender_data * suspenderData;
+
+  // start data
+  osThreadFunc_t start_func;
+  void * start_func_argument;
+
 } osRtxThread_t;
  
  

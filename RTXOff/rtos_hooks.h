@@ -23,6 +23,8 @@
 #ifndef RTOS_IDLE_H
 #define RTOS_IDLE_H
 
+#include "cmsis_os.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -31,15 +33,18 @@ extern "C" {
 /** @{*/
 
 /**
- * \defgroup rtos_Idle Idle hook function
- * @{
- */
-/**
  @note
  Sets the hook function called by idle task
  @param fptr Hook function pointer.
  */
 void rtos_attach_idle_hook(void (*fptr)(void));
+
+/**
+ @note
+ Sets the hook function called by thread termination
+ @param fptr Hook function pointer.
+ */
+void rtos_attach_thread_terminate_hook(void (*fptr)(osThreadId_t id));
 
 /** @}*/
 /** @}*/

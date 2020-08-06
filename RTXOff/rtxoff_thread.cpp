@@ -315,23 +315,25 @@ static void osRtxThreadPostProcess (osRtxThread_t *thread) {
 //  ==== Public API ====
 
 /*
- * Helper function and struct for starting threads.
+ * Helper function for starting threads.
  * Assembly code in RTX causes threads to call osThreadExit() after they return from their main functions.
  * RTXOff cannot do this so we use this helper function to call osThreadExit()
  */
-struct ThreadStartData
+void startThreadHelper(void * unused)
 {
-	osThreadFunc_t func;
-	void *argument;
-};
+    // load data from the scheduler with the mutex locked to prevent switches
+    osThreadFunc_t start_func;
+    void * start_func_argument;
 
-void startThreadHelper(ThreadStartData * startData)
-{
-	// delete struct now in case func never returns
-	ThreadStartData startDataCopy(*startData);
-	delete startData;
+    {
+        ThreadDispatcher::Mutex mutex;
+        osRtxThread_t * thisThread = ThreadDispatcher::instance().thread.run.curr;
+        start_func = thisThread->start_func;
+        start_func_argument = thisThread->start_func_argument;
+    }
 
-	startDataCopy.func(startDataCopy.argument);
+    // once we've loaded the data it doesn't matter if we get suspended/killed
+    start_func(start_func_argument);
 	osThreadExit();
 }
 
@@ -407,14 +409,11 @@ osThreadId_t osThreadNew (osThreadFunc_t func, void *argument, const osThreadAtt
 	thread->thread_flags  = 0U;
 	thread->mutex_list    = NULL;
 	thread->waitValPresent = 0;
-
-	// create helper struct
-	ThreadStartData * startData = new ThreadStartData();
-	startData->func = func;
-	startData->argument = argument;
+    thread->start_func = func;
+    thread->start_func_argument = argument;
 
 	// Create OS thread
-	thread->osThread = thread_suspender_create_suspended_thread(&thread->suspenderData, reinterpret_cast<void (*)(void*)>(&startThreadHelper), startData);
+	thread->osThread = thread_suspender_create_suspended_thread(&thread->suspenderData, reinterpret_cast<void (*)(void*)>(&startThreadHelper), nullptr);
 
 #if !USE_WINTHREAD && defined(HAVE_PTHREAD_SETNAME_NP)
     // copy to 15 character max buffer
@@ -734,7 +733,9 @@ osStatus_t osThreadJoin (osThreadId_t thread_id)
 /// Terminate execution of current running thread.
 __NO_RETURN void osThreadExit (void)
 {
-	if (IsIrqMode() || IsIrqMasked())
+    ThreadDispatcher::instance().hooks.thread_terminate_hook(ThreadDispatcher::instance().thread.run.curr);
+
+    if (IsIrqMode() || IsIrqMasked())
 	{
 		// can't return an error code...
 		for (;;) {}
@@ -799,6 +800,8 @@ __NO_RETURN void osThreadExit (void)
 /// Terminate execution of a thread.
 osStatus_t osThreadTerminate (osThreadId_t thread_id)
 {
+    ThreadDispatcher::instance().hooks.thread_terminate_hook(thread_id);
+
 	if (IsIrqMode() || IsIrqMasked())
 	{
 		return osErrorISR;

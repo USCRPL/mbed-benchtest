@@ -23,7 +23,7 @@
 #include <string.h>
 #include "rtos/Thread.h"
 #include "rtos/ThisThread.h"
-#include "rtos_idle.h"
+#include "rtos_hooks.h"
 #include "rtos_handlers.h"
 #include "platform/mbed_assert.h"
 #include "platform/mbed_error.h"

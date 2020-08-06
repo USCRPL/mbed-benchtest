@@ -9,6 +9,7 @@
 #include "RV_Framework.h"
 // [ILG]
 #include "RV_Report.h"
+#include <stdlib.h>
 
 // [ILG]
 // Required to return a non zero value from cmsis_rv()

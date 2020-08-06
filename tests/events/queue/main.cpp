@@ -36,7 +36,7 @@ using namespace std::chrono_literals;
 #define TEST_EQUEUE_SIZE (18*EVENTS_EVENT_SIZE)
 
 // RTXOff: use 20ms tolerance for delay times
-#define ALLOWED_TIME_LEFT_TOLERANCE_MS   20
+#define ALLOWED_TIME_LEFT_TOLERANCE_MS   30
 
 // flag for called
 volatile bool touched = false;

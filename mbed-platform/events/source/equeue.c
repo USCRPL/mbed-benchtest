@@ -493,12 +493,10 @@ void equeue_break(equeue_t *q)
 void equeue_dispatch(equeue_t *q, int ms)
 {
     unsigned tick = equeue_tick();
-	printf("Beginning dispatch, tick = %u\n", tick);
 	unsigned timeout = tick + ms;
     q->background.active = false;
 
     while (1) {
-		printf("Checking events, tick = %u\n", tick);
 		// collect all the available events and next deadline
         struct equeue_event *es = equeue_dequeue(q, tick);
 
@@ -506,8 +504,6 @@ void equeue_dispatch(equeue_t *q, int ms)
         while (es) {
             struct equeue_event *e = es;
             es = e->next;
-
-            printf("Tick = %u, dispatching event with target time %u\n", tick, e->target);
 
             // actually dispatch the callbacks
             void (*cb)(void *) = e->cb;
@@ -561,9 +557,7 @@ void equeue_dispatch(equeue_t *q, int ms)
         equeue_mutex_unlock(&q->queuelock);
 
         // wait for events
-		printf("Waiting for sema, tick = %u\n", equeue_tick());
 		equeue_sema_wait(&q->eventsema, deadline);
-		printf("Waiting for sema, tick = %u\n", equeue_tick());
 
         // check if we were notified to break out of dispatch
         if (q->break_requested) {

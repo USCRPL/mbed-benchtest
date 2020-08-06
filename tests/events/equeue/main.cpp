@@ -79,7 +79,7 @@ static void timing_func(void *p)
 
     unsigned t1 = timing->delay;
     unsigned t2 = tick - timing->tick;
-    TEST_ASSERT_UINT_WITHIN(20, t2, t1);
+    TEST_ASSERT_UINT_WITHIN(100, t2, t1);
 
     timing->tick = tick;
 }
@@ -1044,12 +1044,12 @@ static void test_equeue_user_allocated_event_post()
     equeue_post_user_allocated(&q, simple_func, &e3.e);
     equeue_dispatch(&q, 101);
 
-    TEST_ASSERT_EQUAL_UINT8(11, touched);
-    TEST_ASSERT_EQUAL_UINT8(1, e1.touched);
-    TEST_ASSERT_EQUAL_UINT8(11, e2.touched);
-    TEST_ASSERT_EQUAL_UINT8(10, e3.touched);
-    TEST_ASSERT_EQUAL_UINT8(11, e4.touched);
-    TEST_ASSERT_EQUAL_UINT8(1, e5.touched);
+    TEST_ASSERT_UINT_WITHIN(1, 11, touched);
+    TEST_ASSERT_UINT_WITHIN(1, 1, e1.touched);
+    TEST_ASSERT_UINT_WITHIN(1, 11, e2.touched);
+    TEST_ASSERT_UINT_WITHIN(1, 10, e3.touched);
+    TEST_ASSERT_UINT_WITHIN(1, 11, e4.touched);
+    TEST_ASSERT_UINT_WITHIN(1, 1, e5.touched);
 
     equeue_destroy(&q);
 }

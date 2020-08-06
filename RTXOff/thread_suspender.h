@@ -11,7 +11,11 @@
 #  define WIN32_LEAN_AND_MEAN 1
 #  include <Windows.h>
 #else
+
+//#  pragma push_macro("__cplusplus")
+//#  define throw __attribute__
 #  include <pthread.h>
+//#  pragma pop_macro("__cplusplus")
 #  include <signal.h>
 #endif
 #include <stdbool.h>
@@ -76,6 +80,7 @@ void thread_suspender_init();
  * On POSIX this requires a context switch since we need to wait for the thread to start.
  * @param data Pointer which will be filled in with this thread's data struct.
  * @param start_func Function pointer to the function to call when the thread exits.
+ * @param on_exit_func If not null, function to call when thread returns from its main function.
  */
 os_thread_id thread_suspender_create_suspended_thread(struct thread_suspender_data ** data, void (*start_func)(void* arg), void* arg);
 

@@ -138,6 +138,7 @@ public:
 	struct
 	{
 		void (*idle_hook)() = rtxOffDefaultIdleFunc;  // Call this function in the idle thread.  Should never be nullptr.
+		void (*thread_terminate_hook)(osThreadId_t id) = rtxOffDefaultThreadTerminateFunc; // Called before we attempt to terminate or exit any thread.
 	} hooks;
 
 #if USE_WINTHREAD

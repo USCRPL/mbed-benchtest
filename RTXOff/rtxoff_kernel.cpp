@@ -74,6 +74,11 @@ void rtxOffDefaultIdleFunc()
 	// do nothing
 }
 
+void rtxOffDefaultThreadTerminateFunc(osThreadId_t id)
+{
+    // do nothing
+}
+
 /// Start the RTOS Kernel scheduler.
 osStatus_t osKernelStart (void)
 {

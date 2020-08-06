@@ -24,30 +24,7 @@
 #define RTOS_HANDLERS_H
 
 #include "rtos/mbed_rtos_types.h"
+#include "rtos_hooks.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/** \defgroup rtos-internal-api RTOS
- * \ingroup mbed-os-internal
- */
-
-/**
- * \defgroup rtos_handlers RTOS hook functions
- * \ingroup rtos-internal-api
- * @{
- */
-/**
- @note
- Sets the hook function called by thread termination
- @param fptr Hook function pointer.
- */
-void rtos_attach_thread_terminate_hook(void (*fptr)(osThreadId_t id));
-/** @}*/
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

@@ -84,7 +84,7 @@ void suspendSignalHandler(int signum)
     pthread_mutex_lock(&myData->wakeupMutex);
     myData->isSuspended = true;
     while(!myData->shouldWakeUp && !myData->shouldTerminate)
-    {
+    { 
         pthread_cond_wait(&myData->wakeupCondVar, &myData->wakeupMutex);
     }
     myData->isSuspended = false;
@@ -228,10 +228,10 @@ void thread_suspender_kill(os_thread_id thread, struct thread_suspender_data * d
     pthread_cond_signal(&data->wakeupCondVar);
     pthread_mutex_unlock(&data->wakeupMutex);
 }
-S
+
 __NO_RETURN void thread_suspender_current_thread_exit()
 {
-    // note: this function is called all thread data mutexes unlocked
+    // note: this function is called with all thread data mutexes unlocked
 
     // dealloc mutexes
     pthread_mutex_destroy(&myData->wakeupMutex);

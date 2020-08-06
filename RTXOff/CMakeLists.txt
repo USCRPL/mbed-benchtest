@@ -20,8 +20,8 @@ set(RTX_OFF_SOURCES
 	# Fake Mbed APIs
 	platform/mbed_critical.h
 	platform/mbed_critical.cpp
-	rtos_idle.h
-	rtxoff_idle.cpp
+	rtos_hooks.h
+	rtxoff_hooks.cpp
 
 	# implementations
 	RTX_Config.h
@@ -48,6 +48,11 @@ target_include_directories(rtxoff PUBLIC . platform)
 
 # link with CMake pthreads
 target_link_libraries(rtxoff Threads::Threads)
+
+# Turn off exceptions.  On some platforms pthread_exit() uses an exception to unwind the stack,
+# and this causes issues (SIGABRT when an exception propagates out of a pthread function).
+# RTXOff will CRASH INTERMITTENTLY on Linux without this option!
+target_compile_options(rtxoff PUBLIC -fno-exceptions)
 
 # detect windows vs linux
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")

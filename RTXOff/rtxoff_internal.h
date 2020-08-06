@@ -21,6 +21,7 @@
 
 // Kernel functions
 void rtxOffDefaultIdleFunc();
+void rtxOffDefaultThreadTerminateFunc(osThreadId_t id);
 
 // Thread Library functions
 void printThreadLL(osRtxThread_t * head);
