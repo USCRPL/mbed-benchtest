@@ -18,6 +18,7 @@
 #define MBED_ERROR_H
 
 #include <stdbool.h>
+#include <stddef.h>
 #include "platform/mbed_retarget.h"
 #include "platform/mbed_toolchain.h"
 

@@ -46,10 +46,12 @@ osThreadDef (Th_Sig_Child_0, osPriorityBelowNormal, 0);
 osThreadDef (Th_Sig_Child_1, osPriorityBelowNormal, 0);
 
 /* Definitions for TC_SignalWaitTimeout */
-void Th_SignalSet (void const *arg);
-
-osThreadDef (Th_SignalSet, osPriorityNormal, 0);
-
+void Th_SignalSet (void *arg);
+osThreadAttr_t signalSetAttrs = {
+    .name="Th_SignalSet",
+    .attr_bits=osThreadJoinable,
+    .priority=osPriorityAboveNormal
+};
 
 /* Definitions for signal management test in the ISR */
 
@@ -121,7 +123,7 @@ void Signal_IRQHandler (void) {
 /*-----------------------------------------------------------------------------
  * Signal setting thread
  *----------------------------------------------------------------------------*/
-void Th_SignalSet (void const *arg) {
+void Th_SignalSet (void *arg) {
   int32_t flags = *(int32_t *)arg;
   osSignalSet (Var_ThreadId, flags);
 }
@@ -435,11 +437,6 @@ void TC_SignalChildToChild (void) {
     if (evt.status == osEventSignal) {
       ASSERT_TRUE ((evt.value.signals & 0x03) == 0x03);
     }
-
-    // [ILG]
-    osThreadTerminate(id[0]);
-    osThreadTerminate(id[1]);
-    // -----
   }
 }
 
@@ -477,7 +474,7 @@ void TC_SignalWaitTimeout (void) {
     
     /* - Create a signal setting thread */
     flags = 3;
-    id = osThreadCreate (osThread (Th_SignalSet), &flags);
+    id = osThreadNew(&Th_SignalSet, &flags, &signalSetAttrs);
     ASSERT_TRUE (id != NULL);
     
     if (id != NULL) {
@@ -490,11 +487,11 @@ void TC_SignalWaitTimeout (void) {
     // [ILG]
     // Allow time to terminate
     osDelay(10);
-    osThreadTerminate(id);
+    ASSERT_TRUE(osThreadTerminate(id));
 
     /* - Create a signal setting thread */
     flags = 5;
-    id = osThreadCreate (osThread (Th_SignalSet), &flags);
+    id = osThreadNew(&Th_SignalSet, &flags, &signalSetAttrs);
     ASSERT_TRUE (id != NULL);
     
     if (id != NULL) {
@@ -503,6 +500,8 @@ void TC_SignalWaitTimeout (void) {
       /* - Wait for various signal masks from a signaling thread */
       ASSERT_TRUE (osSignalWait (2, 10).status == osEventSignal);
     }
+
+    ASSERT_TRUE(osThreadJoin(id) == osOK);
   }
 }
 

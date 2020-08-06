@@ -57,6 +57,14 @@ if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
 	target_compile_definitions(rtxoff PUBLIC _WIN32_WINNT=0x601)
 else()
 	target_compile_definitions(rtxoff PUBLIC USE_WINTHREAD=0 _GNU_SOURCE=1)
+
+	# check if the nonstandard pthread_setname_np() function exists
+	set(CMAKE_REQUIRED_LIBRARIES Threads::Threads)
+	check_all_functions(pthread_setname_np)
+
+	if(HAVE_PTHREAD_SETNAME_NP)
+		target_compile_definitions(rtxoff PRIVATE HAVE_PTHREAD_SETNAME_NP)
+	endif()
 endif()
 
 # manually apply mbed configs

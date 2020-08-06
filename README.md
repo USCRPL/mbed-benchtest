@@ -12,8 +12,18 @@ Note that these timing inaccuracies also apply to timed waits in certain cases b
 
 RTXOff supports interrupts, using the standard [NVIC interrupt functions](https://www.keil.com/pack/doc/CMSIS/Core/html/group__NVIC__gr.html).  This allows you to test code that uses interrupts in a reasonable way -- just write testing code that calls NVIC_EnableIRQ() at the appropriate time to trigger an interrupt in your code.  Note that the NVIC_XXX functions are safe to call from any thread, unlike all other cmsis-rtos API functions which are only safe to call from RTOS threads.  RTXOff interrupts do support priority (the interrupt with lowest priority value will be delivered first if multiple are triggered), but they do *not* support interrupting a currently executing interrupt with another interrupt (which is what happens on the processor if a higher priority interrupt is triggered).  Instead, the new interrupt will be executed as soon as the current one returns.
 
-**Current Limitations**:
+**Current Limitations / Things to Know**:
 - Main Function: Without toolchain support, there's no way to override your app's main() function.  So, your app's main should be called `int mbed_start()` (`extern "C" int mbed_start()` if in C++).  RTXOff's main thread will call this function when it starts.
-- Only Windows (MSVC and MinGW) is supported right now, though UNIX support is being worked on.
 - RTXOff does not use or check the memory that your code allocates for RTOS objects and thread stacks.  Even if RTXOff did check stack sizes, your program's stack would be a different size when compiled for desktop than when built for ARM.  So, you cannot verify that your threads have enough stack space to run with RTXOff.
 - The scheduler tick frequency must be between 1Hz-1000Hz (so the tick period must be between 1ms-1000ms)
+- On some platforms, osThreadTerminate() will unwind the thread's stack just like an exception, calling destructors for any local variables.  On other platforms, this does not occur and stack object destructors are not called.  The real processor uses the latter behavior.
+- Be aware that RTXOff uses thread suspension to implement context switches, and not all host OS functions (e.g. printf()) are OK with this.  Calling these functions from multiple threads can potentially result in a deadlock if a thread switch occurs from one thread in the middle of printf() to another thread that then calls printf().  A stopgap solution is to disable interrupts (using `core_util_critical_section_enter()`) when calling these functions so the scheduler cannot switch threads.  However, a better solution would be to proxy these types of operations to another thread.  We are thinking about ways to implement this.
+    - Confused about how this happens?  Imagine this: 
+        - Thread A calls printf().  printf() locks an internal mutex to prevent other threads from entering printf().
+        - The RTXOff scheduler preempts thread A and suspends it.
+        - Thread B (which has higher priority than A) exits a timed wait.
+        - The RTXOff scheduler switches to B
+        - B calls printf(), which then attempts to lock the mutex that A is holding.
+        - The RTXOff scheduler will keep preempting B on schedule, but the underlying OS will never allow B to continue without the mutex that A is holding.  However, the scheduler will never transfer to control to A while B (which has higher priority) is running.
+        
+   

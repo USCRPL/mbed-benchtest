@@ -89,7 +89,8 @@ utest::v1::status_t utest::v1::verbose_case_teardown_handler(const Case *const s
     if (failure.reason == REASON_NONE) {
         utest_printf("\n");
     } else  {
-        utest_printf(" with reason '%s'\n", stringify(failure.reason));
+        const char* reason = stringify(failure.reason);
+        utest_printf(" with reason '%s'\n", reason);
     }
     return STATUS_CONTINUE;
 }

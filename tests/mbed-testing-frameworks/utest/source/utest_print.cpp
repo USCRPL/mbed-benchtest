@@ -28,10 +28,13 @@
 
 static int utest_vprintf(const char *format, std::va_list arg)
 {
+    // first calculate the length of the string
+    std::va_list argCopy;
+    va_copy(argCopy, arg);
     // ARMCC microlib does not properly handle a size of 0.
     // As a workaround supply a dummy buffer with a size of 1.
     char dummy_buf[1];
-    int len = vsnprintf(dummy_buf, sizeof(dummy_buf), format, arg);
+    int len = vsnprintf(dummy_buf, sizeof(dummy_buf), format, argCopy);
     if (len < STRING_STACK_LIMIT) {
         char temp[STRING_STACK_LIMIT];
         vsprintf(temp, format, arg);

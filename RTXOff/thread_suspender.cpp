@@ -224,11 +224,11 @@ void thread_suspender_kill(os_thread_id thread, struct thread_suspender_data * d
         // signal the thread to enter the suspend handler
         pthread_kill(thread, SUSPEND_SIGNAL);
     }
-    myData->shouldTerminate = true;
+    data->shouldTerminate = true;
     pthread_cond_signal(&data->wakeupCondVar);
     pthread_mutex_unlock(&data->wakeupMutex);
 }
-
+S
 __NO_RETURN void thread_suspender_current_thread_exit()
 {
     // note: this function is called all thread data mutexes unlocked

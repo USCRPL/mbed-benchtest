@@ -5,6 +5,8 @@
 #include "rtxoff_internal.h"
 #include "ThreadDispatcher.h"
 
+#include <cstring>
+
 //  ==== Helper functions ====
 
 /// Set Thread Flags.
@@ -414,6 +416,18 @@ osThreadId_t osThreadNew (osThreadFunc_t func, void *argument, const osThreadAtt
 	// Create OS thread
 	thread->osThread = thread_suspender_create_suspended_thread(&thread->suspenderData, reinterpret_cast<void (*)(void*)>(&startThreadHelper), startData);
 
+#if !USE_WINTHREAD && defined(HAVE_PTHREAD_SETNAME_NP)
+    // copy to 15 character max buffer
+    size_t stringChars = std::min(strlen(thread->name), static_cast<size_t>(15));
+    char* nameAbridged = new char[stringChars + 1];
+    memcpy(nameAbridged, thread->name, stringChars);
+    nameAbridged[stringChars] = '\0';
+
+    // set name for debugging
+    pthread_setname_np(thread->osThread, nameAbridged);
+
+    delete[] nameAbridged;
+#endif
 	ThreadDispatcher::instance().dispatch(thread);
 
 #if RTXOFF_DEBUG

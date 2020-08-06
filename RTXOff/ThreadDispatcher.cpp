@@ -55,7 +55,14 @@ ThreadDispatcher::ThreadDispatcher()
     pthread_mutexattr_destroy(&recursiveAttr);
 
     // initialize kernel mode cond var
-    pthread_cond_init(&kernelModeCondVar, nullptr);
+    // make sure that the condition variable is using the monotonic clock
+    pthread_condattr_t monotonicClockAttr;
+    pthread_condattr_init(&monotonicClockAttr);
+    pthread_condattr_setclock(&monotonicClockAttr, CLOCK_MONOTONIC); // sadly CLOCK_PROCESS_CPUTIME_ID is not supported here
+
+    pthread_cond_init(&kernelModeCondVar, &monotonicClockAttr);
+
+    pthread_condattr_destroy(&monotonicClockAttr);
 }
 
 void ThreadDispatcher::lockMutex()
@@ -72,7 +79,16 @@ void ThreadDispatcher::unlockMutex()
     int pthread_errorcode = pthread_mutex_unlock(&kernelDataMutex);
     if(pthread_errorcode != 0)
     {
-        std::cerr << "Error unlocking kernel mutex: " << std::system_category().message(pthread_errorcode) << std::endl;
+        if(pthread_errorcode == EPERM)
+        {
+            // On some platforms (seen on Linux), calling pthread_exit() will unwind the stack and trigger]
+            // ThreadDispatcher::~Mutex() calls, which then cause the mutex to be unlocked again even if it's
+            // already unlocked.  So we can ignore this error.
+        }
+        else
+        {
+            std::cerr << "Error unlocking kernel mutex: " << std::system_category().message(pthread_errorcode) << std::endl;
+        }
     }
 }
 
@@ -89,13 +105,6 @@ void ThreadDispatcher::requestSchedule()
 
 void ThreadDispatcher::dispatchForever()
 {
-#if !USE_WINTHREAD
-    // define time struct for pthread_cond_timedwait
-    struct timespec waitTime{
-        .tv_sec = OS_TICK_PERIOD_MS / 1000,
-        .tv_nsec = OS_TICK_PERIOD_MS * 1000000
-    };
-#endif
 	while(true)
 	{
 		// Dispatch the current thread
@@ -107,7 +116,12 @@ void ThreadDispatcher::dispatchForever()
 #if USE_WINTHREAD
 		SleepConditionVariableCS(&kernelModeCondVar, &kernelDataMutex, OS_TICK_PERIOD_MS);
 #else
-		pthread_cond_timedwait(&kernelModeCondVar, &kernelDataMutex, &waitTime);
+		// calculate absolute time to wake up
+		struct timespec wakeupTime;
+		clock_gettime(CLOCK_MONOTONIC, &wakeupTime);
+		wakeupTime.tv_nsec += OS_TICK_PERIOD_MS * 1000000;
+		wakeupTime.tv_sec += OS_TICK_PERIOD_MS / 1000;
+		pthread_cond_timedwait(&kernelModeCondVar, &kernelDataMutex, &wakeupTime);
 #endif
 
 		if(thread.run.curr != nullptr)
