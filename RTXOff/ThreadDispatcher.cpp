@@ -37,88 +37,6 @@ void ThreadDispatcher::unlockMutex()
 	LeaveCriticalSection(&kernelDataMutex);
 }
 
-void ThreadDispatcher::dispatchForever()
-{
-	while(true)
-	{
-#if RTXOFF_DEBUG
-		// sanity check that thread is still running
-		DWORD exitCode;
-		GetExitCodeThread(thread.run.curr->osThread, &exitCode);
-		if(exitCode != STILL_ACTIVE)
-		{
-			std::cerr << "RTXOff Sanity Check Failure: thread " << thread.run.curr->name << " has finished execution but is still active according to RTX scheduler." << std::endl;
-		}
-#endif
-
-		// Dispatch the current thread
-		if(ResumeThread(thread.run.curr->osThread) < 0)
-		{
-			std::cerr << "Error resuming RTX thread " << thread.run.curr->name << ": " << std::system_category().message(GetLastError()) << std::endl;
-		}
-
-		// wait on the kernel mode cond var
-		// note: a spurious wakeup is OK, because if the next thread hasn't changed and there is no timer tick, then
-		// waking up won't do anything.
-		SleepConditionVariableCS(&kernelModeCondVar, &kernelDataMutex, OS_TICK_PERIOD_MS);
-
-
-		if(thread.run.curr != nullptr)
-		{
-			// current thread still exists, try to suspend it
-			if(SuspendThread(thread.run.curr->osThread) < 0)
-			{
-				std::cerr << "Error suspending RTX thread " << thread.run.curr->name << ": " << std::system_category().message(GetLastError()) << std::endl;
-			}
-		}
-
-		if(!interrupt.enabled)
-		{
-			// If interrupts are disabled, the scheduler can't run on the real processor.
-			// Emulate that by switching back immediately.
-
-			if(thread.run.curr == nullptr)
-			{
-				std::cerr << "RTXOFF Critical Error: Interrupts disabled but don't have a thread to run??" << std::endl;
-				exit(4);
-			}
-			continue;
-		}
-
-		if(thread.run.next != nullptr)
-		{
-			// one of the RTX functions has triggered us to switch to a different thread.
-			thread.run.curr = thread.run.next;
-			thread.run.next = nullptr;
-		}
-
-		if(thread.run.curr == nullptr)
-		{
-			std::cerr << "RTXOFF Critical Error: Thread terminated but don't have another thread to run!" << std::endl;
-			exit(4);
-		}
-
-		// check if there are interrupts to process
-		if(!interrupt.pendingInterrupts.empty())
-		{
-			processInterrupts();
-			processQueuedISRData();
-		}
-
-		// regardless of what else happened, check if enough time has passed to deliver a tick.
-		if(updateTick())
-		{
-			// deliver the next tick
-			onTick();
-
-			// load thread that tick handler says to use
-			thread.run.curr = thread.run.next;
-			thread.run.next = nullptr;
-		}
-
-	}
-}
-
 void ThreadDispatcher::requestSchedule()
 {
 	WakeConditionVariable(&kernelModeCondVar);
@@ -168,6 +86,72 @@ void ThreadDispatcher::requestSchedule()
 }
 
 #endif
+
+void ThreadDispatcher::dispatchForever()
+{
+	while(true)
+	{
+		// Dispatch the current thread
+		thread_suspender_resume(thread.run.curr->osThread, thread.run.curr->suspenderData);
+
+		// wait on the kernel mode cond var
+		// note: a spurious wakeup is OK, because if the next thread hasn't changed and there is no timer tick, then
+		// waking up won't do anything.
+		SleepConditionVariableCS(&kernelModeCondVar, &kernelDataMutex, OS_TICK_PERIOD_MS);
+
+
+		if(thread.run.curr != nullptr)
+		{
+			// current thread still exists, try to suspend it
+			thread_suspender_suspend(thread.run.curr->osThread, thread.run.curr->suspenderData);
+		}
+
+		if(!interrupt.enabled)
+		{
+			// If interrupts are disabled, the scheduler can't run on the real processor.
+			// Emulate that by switching back immediately.
+
+			if(thread.run.curr == nullptr)
+			{
+				std::cerr << "RTXOFF Critical Error: Interrupts disabled but don't have a thread to run??" << std::endl;
+				exit(4);
+			}
+			continue;
+		}
+
+		if(thread.run.next != nullptr)
+		{
+			// one of the RTX functions has triggered us to switch to a different thread.
+			thread.run.curr = thread.run.next;
+			thread.run.next = nullptr;
+		}
+
+		if(thread.run.curr == nullptr)
+		{
+			std::cerr << "RTXOFF Critical Error: Thread terminated but don't have another thread to run!" << std::endl;
+			exit(4);
+		}
+
+		// check if there are interrupts to process
+		if(!interrupt.pendingInterrupts.empty())
+		{
+			processInterrupts();
+			processQueuedISRData();
+		}
+
+		// regardless of what else happened, check if enough time has passed to deliver a tick.
+		if(updateTick())
+		{
+			// deliver the next tick
+			onTick();
+
+			// load thread that tick handler says to use
+			thread.run.curr = thread.run.next;
+			thread.run.next = nullptr;
+		}
+
+	}
+}
 
 void ThreadDispatcher::switchNextThread(osRtxThread_t * nextThread)
 {

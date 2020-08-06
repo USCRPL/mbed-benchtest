@@ -25,6 +25,8 @@ osStatus_t osKernelInitialize (void)
 		return osError;
 	}
 
+	thread_suspender_init();
+
 	ThreadDispatcher::instance().kernel.state = osRtxKernelReady;
 
 	return osOK;

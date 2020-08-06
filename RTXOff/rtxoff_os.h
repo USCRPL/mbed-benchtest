@@ -29,7 +29,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "cmsis_os2.h"
-
+#include "thread_suspender.h"
 
 
 #ifdef  __cplusplus
@@ -127,11 +127,8 @@ typedef struct osRtxThread_s {
   uint32_t waitExitVal;                 // return value passed from osRtxThreadWaitExit().  Set only when this function is called, not when a thread wait timeout expires.
   uint8_t waitValPresent;               // Whether above value is present.
 
-#if USE_WINTHREAD
-  HANDLE osThread;
-#else
-  pthread_t osThread;
-#endif
+  os_thread_id osThread;
+  struct thread_suspender_data * suspenderData;
 } osRtxThread_t;
  
  

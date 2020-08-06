@@ -36,6 +36,8 @@ set(RTX_OFF_SOURCES
 	ThreadDispatcher.h
 	rtxoff_clock.h
 	rtxoff_clock.cpp
+	thread_suspender.h
+	thread_suspender.cpp
 
 	# program entry point
 	rtxoff_main.cpp thread_suspender.h)

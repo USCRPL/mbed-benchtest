@@ -412,26 +412,7 @@ osThreadId_t osThreadNew (osThreadFunc_t func, void *argument, const osThreadAtt
 	startData->argument = argument;
 
 	// Create OS thread
-#if USE_WINTHREAD
-	thread->osThread = CreateThread(nullptr,
-			0,
-			reinterpret_cast<LPTHREAD_START_ROUTINE>(&startThreadHelper),
-			reinterpret_cast<void*>(startData),
-			CREATE_SUSPENDED,
-			nullptr);
-
-	if(thread->osThread == nullptr)
-	{
-		std::cerr << "Error creating thread: " << std::system_category().message(GetLastError()) << std::endl;
-		return nullptr;
-	}
-#else
-#error TODO
-#endif
-
-	//std::cerr << "Before creating thread " << name << std::endl;
-	//std::cerr << "Ready list is: ";
-	//printThreadLL(reinterpret_cast<osRtxThread_t *>(ThreadDispatcher::instance().thread.ready.thread_list));
+	thread->osThread = thread_suspender_create_suspended_thread(&thread->suspenderData, reinterpret_cast<void (*)(void*)>(&startThreadHelper), startData);
 
 	ThreadDispatcher::instance().dispatch(thread);
 
@@ -798,11 +779,7 @@ __NO_RETURN void osThreadExit (void)
 	ThreadDispatcher::instance().requestSchedule();
 	ThreadDispatcher::instance().unlockMutex();
 
-#if USE_WINTHREAD
-	ExitThread(0);
-#else
-#error TODO
-#endif
+	thread_suspender_current_thread_exit();
 }
 
 /// Terminate execution of a thread.
@@ -876,14 +853,7 @@ osStatus_t osThreadTerminate (osThreadId_t thread_id)
 		if(!terminatingSelf)
 		{
 			// terminate the OS thread
-#if USE_WINTHREAD
-			if(!TerminateThread(thread->osThread, 0))
-			{
-				std::cerr << "Error terminating RTX thread: " << std::system_category().message(GetLastError()) << std::endl;
-			}
-#else
-#error TODO
-#endif
+			thread_suspender_kill(thread->osThread, thread->suspenderData);
 		}
 
 		if ((thread->attr & osThreadJoinable) == 0U)
@@ -908,11 +878,7 @@ osStatus_t osThreadTerminate (osThreadId_t thread_id)
 			ThreadDispatcher::instance().requestSchedule();
 			ThreadDispatcher::instance().unlockMutex();
 
-#if USE_WINTHREAD
-			ExitThread(0);
-#else
-#error TODO
-#endif
+			thread_suspender_current_thread_exit();
 		}
 	}
 

@@ -21,7 +21,7 @@ extern "C" {
 #endif
 
 #if USE_WINTHREAD
-typdef HANDLE os_thread_id;
+typedef HANDLE os_thread_id;
 
 struct thread_suspender_data
 {
@@ -45,6 +45,12 @@ struct thread_suspender_data {
     // mutex for above cond var
     pthread_mutex_t wakeupMutex;
 
+    // condition variable to indicate that the thread has started
+    pthread_cond_t startCondVar;
+
+    // mutex for above cond var
+    pthread_mutex_t startMutex;
+
     // whether the thread should wake up now
     bool shouldWakeUp;
 
@@ -59,12 +65,12 @@ struct thread_suspender_data {
 void thread_suspender_init();
 
 /**
- * Initialize the thread suspender library data for a specific thread.
- * MUST be called from the context of the thread itself (for access to thread local storage)!
- * @param thread
- * @param data
+ * Create a new thread in the suspended state.
+ * On POSIX this requires a context switch since we need to wait for the thread to start.
+ * @param data Pointer which will be filled in with this thread's data struct.
+ * @param start_func Function pointer to the function to call when the thread exits.
  */
-void thread_suspender_thread_init(os_thread_id thread, struct thread_suspender_data * data);
+os_thread_id thread_suspender_create_suspended_thread(struct thread_suspender_data ** data, void (*start_func)(void* arg), void* arg);
 
 /**
  * Suspend the given thread.  Next time the OS transfers control back to this thread, it will be blocked
@@ -82,18 +88,19 @@ void thread_suspender_suspend(os_thread_id thread, struct thread_suspender_data 
 void thread_suspender_resume(os_thread_id thread, struct thread_suspender_data * data);
 
 /**
- * Terminate the given suspended thread.  It will terminate at some point in the future and never
- * execute any instructions after where it was suspended.
+ * Terminate the given thread.  It will terminate at some point in the future and never
+ * execute any more instructions.
  */
 void thread_suspender_kill(os_thread_id thread, struct thread_suspender_data * data);
 
 /**
- * Destroy the suspender data for a thread.  Should be called at some point to prevent a memory leak.
- * May be called from the thread itself, or from another thread once the thread doesn't need to be suspended anymore.
- * @param thread
- * @param data
+ * Call this to exit the current thread.
+ * Deallocates the thread's data.
+ * Automatically called by a thread when:
+ *  - it is killed with thread_suspender_kill()
+ *  - it returns from its main function
  */
-void thread_suspender_destroy_data(os_thread_id thread, struct thread_suspender_data * data);
+__NO_RETURN void thread_suspender_current_thread_exit();
 
 #ifdef __cplusplus
 }
