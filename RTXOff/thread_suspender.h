@@ -48,7 +48,7 @@ struct thread_suspender_data {
     // condition variable to indicate that the thread has started
     pthread_cond_t startCondVar;
 
-    // mutex for above cond var
+    // mutex for above cond var and hasStarted
     pthread_mutex_t startMutex;
 
     // whether the thread should wake up now
@@ -56,6 +56,13 @@ struct thread_suspender_data {
 
     // whether the thread should terminate now
     bool shouldTerminate;
+
+    // whether the thread has begun starting and entered the suspend handler
+    bool hasStarted;
+
+    // True iff the thread is currently in the signal handler waiting for wakeup.
+    // Protected by wakeupMutex.
+    bool isSuspended;
 };
 #endif
 
@@ -95,7 +102,9 @@ void thread_suspender_kill(os_thread_id thread, struct thread_suspender_data * d
 
 /**
  * Call this to exit the current thread.
- * Deallocates the thread's data.
+ * Deallocates the thread's data.  Once this function has been called, no other thread suspender functions
+ * may be called on the thread.
+ *
  * Automatically called by a thread when:
  *  - it is killed with thread_suspender_kill()
  *  - it returns from its main function

@@ -213,7 +213,7 @@ static void osRtxThreadFree (osRtxThread_t *thread)
 #if USE_WINTHREAD
 	CloseHandle(thread->osThread);
 #else
-#error TODO
+    pthread_detach(thread->osThread);
 #endif
 
 	// delete thread object itself
@@ -305,7 +305,7 @@ static void osRtxThreadPostProcess (osRtxThread_t *thread) {
 	if (thread->state == osRtxThreadWaitingThreadFlags) {
 		thread_flags = ThreadFlagsCheck(thread, thread->wait_flags, thread->flags_options);
 		if (thread_flags != 0U) {
-			osRtxThreadWaitExit(thread, thread_flags, FALSE);
+			osRtxThreadWaitExit(thread, thread_flags, false);
 		}
 	}
 }
@@ -747,7 +747,7 @@ __NO_RETURN void osThreadExit (void)
 
 	// Wakeup Thread waiting to Join
 	if (thread->thread_join != NULL) {
-		osRtxThreadWaitExit(thread->thread_join, (uint32_t)osOK, FALSE);
+		osRtxThreadWaitExit(thread->thread_join, (uint32_t)osOK, false);
 	}
 
 	// Switch to next Ready Thread
@@ -835,7 +835,7 @@ osStatus_t osThreadTerminate (osThreadId_t thread_id)
 
 		// Wakeup Thread waiting to Join
 		if (thread->thread_join != NULL) {
-			osRtxThreadWaitExit(thread->thread_join, (uint32_t)osOK, FALSE);
+			osRtxThreadWaitExit(thread->thread_join, (uint32_t)osOK, false);
 		}
 
 		bool terminatingSelf = thread->state == osRtxThreadRunning;

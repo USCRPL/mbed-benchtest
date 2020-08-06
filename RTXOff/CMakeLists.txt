@@ -46,6 +46,9 @@ add_library(rtxoff STATIC ${RTX_OFF_SOURCES})
 target_link_libraries(rtxoff)
 target_include_directories(rtxoff PUBLIC . platform)
 
+# link with CMake pthreads
+target_link_libraries(rtxoff Threads::Threads)
+
 # detect windows vs linux
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
 	target_compile_definitions(rtxoff PUBLIC USE_WINTHREAD=1)

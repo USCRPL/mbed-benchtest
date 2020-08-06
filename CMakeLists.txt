@@ -9,6 +9,8 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_C_STANDARD 99)
 add_compile_options(-Wall)
 
+find_package(Threads REQUIRED)
+
 # recurse to subdirectories
 # -------------------------------------------------------------
 

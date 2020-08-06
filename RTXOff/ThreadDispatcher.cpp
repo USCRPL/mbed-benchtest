@@ -89,16 +89,26 @@ void ThreadDispatcher::requestSchedule()
 
 void ThreadDispatcher::dispatchForever()
 {
+#if !USE_WINTHREAD
+    // define time struct for pthread_cond_timedwait
+    struct timespec waitTime{
+        .tv_sec = OS_TICK_PERIOD_MS / 1000,
+        .tv_nsec = OS_TICK_PERIOD_MS * 1000000
+    };
+#endif
 	while(true)
 	{
 		// Dispatch the current thread
 		thread_suspender_resume(thread.run.curr->osThread, thread.run.curr->suspenderData);
 
-		// wait on the kernel mode cond var
-		// note: a spurious wakeup is OK, because if the next thread hasn't changed and there is no timer tick, then
-		// waking up won't do anything.
+        // wait on the kernel mode cond var
+        // note: a spurious wakeup is OK, because if the next thread hasn't changed and there is no timer tick, then
+        // waking up won't do anything.
+#if USE_WINTHREAD
 		SleepConditionVariableCS(&kernelModeCondVar, &kernelDataMutex, OS_TICK_PERIOD_MS);
-
+#else
+		pthread_cond_timedwait(&kernelModeCondVar, &kernelDataMutex, &waitTime);
+#endif
 
 		if(thread.run.curr != nullptr)
 		{
