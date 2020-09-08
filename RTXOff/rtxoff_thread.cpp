@@ -248,7 +248,7 @@ void *osRtxThreadListRoot (osRtxThread_t *thread)
 /// \param[in]  thread          thread object.
 /// \param[in]  ret_val         return value.
 /// \param[in]  dispatch        dispatch flag.
-void osRtxThreadWaitExit(osRtxThread_t *thread, uint32_t ret_val, bool dispatch)
+void osRtxThreadWaitExit(osRtxThread_t *thread, uint64_t ret_val, bool dispatch)
 {
 	ThreadDispatcher::instance().delayListRemove(thread);
 	thread->waitExitVal = ret_val;

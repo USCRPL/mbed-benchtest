@@ -124,7 +124,7 @@ typedef struct osRtxThread_s {
   uint32_t               thread_flags;  ///< Thread Flags
   struct osRtxMutex_s     *mutex_list;  ///< Link pointer to list of owned Mutexes
 
-  uint32_t waitExitVal;                 // return value passed from osRtxThreadWaitExit().  Set only when this function is called, not when a thread wait timeout expires.
+  uint64_t waitExitVal;                 // return value passed from osRtxThreadWaitExit().  Set only when this function is called, not when a thread wait timeout expires.
   uint8_t waitValPresent;               // Whether above value is present.
 
   os_thread_id osThread;

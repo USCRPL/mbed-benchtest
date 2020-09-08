@@ -160,7 +160,6 @@ int32_t osSemaphoreWait (osSemaphoreId semaphore_id, uint32_t millisec) {
 
 #endif  // Semaphore
 
-/*
 // Memory Pool
 
 #if (defined(osFeature_Pool) && (osFeature_Pool != 0))&& !defined(os1_Disable_Pool)
@@ -198,6 +197,7 @@ osStatus osPoolFree (osPoolId pool_id, void *block) {
 
 #endif  // Memory Pool
 
+/*
 
 // Message Queue
 
