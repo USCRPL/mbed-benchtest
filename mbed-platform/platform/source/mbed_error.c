@@ -49,7 +49,7 @@ static void print_error_report(const mbed_error_ctx *ctx, const char *, const ch
 #define ERROR_REPORT(ctx, error_msg, error_filename, error_line) ((void) 0)
 #endif
 
-bool mbed_error_in_progress;
+atomic_bool mbed_error_in_progress;
 static atomic_flag halt_in_progress = ATOMIC_FLAG_INIT;
 static int error_count = 0;
 static mbed_error_ctx first_error_ctx = {0};
