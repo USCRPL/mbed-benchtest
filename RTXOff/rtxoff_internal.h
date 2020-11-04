@@ -33,7 +33,7 @@ void osRtxThreadBlock (osRtxThread_t *thread);
 void osRtxThreadListUnlink (osRtxThread_t **thread_list, osRtxThread_t *thread);
 void osRtxThreadReadyPut (osRtxThread_t * thread);
 void *osRtxThreadListRoot (osRtxThread_t *thread);
-void osRtxThreadWaitExit(osRtxThread_t *thread, uint32_t ret_val, bool dispatch);
+void osRtxThreadWaitExit(osRtxThread_t *thread, uint64_t ret_val, bool dispatch);
 bool osRtxThreadWaitEnter (uint8_t state, uint32_t timeout);
 
 // Mutex Library functions
