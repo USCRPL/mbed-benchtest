@@ -239,7 +239,7 @@ static osMemoryPoolId_t svcRtxMemoryPoolNew(uint32_t block_count, uint32_t block
         (void) osRtxMemoryPoolInit(&mp->mp_info, b_count, b_size, mp_mem);
 
         // Register post ISR processing function
-        // TODO osRtxInfo.post_process.memory_pool = osRtxMemoryPoolPostProcess;
+        ThreadDispatcher::instance().post_process.memory_pool = osRtxMemoryPoolPostProcess;
 
         // add event
         // EvrRtxMemoryPoolCreated(mp, mp->name);
@@ -528,7 +528,7 @@ isrRtxMemoryPoolFree(osMemoryPoolId_t mp_id, void *block) {
     if (status == osOK) {
         // Register post ISR processing
 
-        // TODO osRtxPostProcess(reinterpret_cast<osRtxObject_t *>(mp));
+        ThreadDispatcher::instance().queuePostProcess(reinterpret_cast<osRtxObject_t *>(mp));
         // add event
         // EvrRtxMemoryPoolDeallocated(mp, block);
     } else {
