@@ -289,16 +289,7 @@ typedef struct {
   uint32_t max_used;                    ///< Maximum used
 } osRtxObjectMemUsage_t;
  
-/// OS Runtime Object Memory Usage variables
-extern osRtxObjectMemUsage_t osRtxThreadMemUsage;
-extern osRtxObjectMemUsage_t osRtxTimerMemUsage;
-extern osRtxObjectMemUsage_t osRtxEventFlagsMemUsage;
-extern osRtxObjectMemUsage_t osRtxMutexMemUsage;
-extern osRtxObjectMemUsage_t osRtxSemaphoreMemUsage;
-extern osRtxObjectMemUsage_t osRtxMemoryPoolMemUsage;
-extern osRtxObjectMemUsage_t osRtxMessageQueueMemUsage;
- 
- 
+
 //  ==== OS API definitions ====
  
 // Object Limits definitions
