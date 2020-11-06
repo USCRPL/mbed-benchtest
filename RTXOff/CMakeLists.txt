@@ -32,6 +32,7 @@ set(RTX_OFF_SOURCES
 	rtxoff_delay.cpp
 	rtxoff_evflags.cpp
 	rtxoff_semaphore.cpp
+	rtxoff_mempool.cpp
 	ThreadDispatcher.cpp
 	ThreadDispatcher.h
 	rtxoff_clock.h

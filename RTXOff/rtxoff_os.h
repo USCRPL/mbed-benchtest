@@ -124,7 +124,7 @@ typedef struct osRtxThread_s {
   uint32_t               thread_flags;  ///< Thread Flags
   struct osRtxMutex_s     *mutex_list;  ///< Link pointer to list of owned Mutexes
 
-  uint32_t waitExitVal;                 // return value passed from osRtxThreadWaitExit().  Set only when this function is called, not when a thread wait timeout expires.
+  uint64_t waitExitVal;                 // return value passed from osRtxThreadWaitExit().  Set only when this function is called, not when a thread wait timeout expires.
   uint8_t waitValPresent;               // Whether above value is present.
 
   os_thread_id osThread;
@@ -289,16 +289,7 @@ typedef struct {
   uint32_t max_used;                    ///< Maximum used
 } osRtxObjectMemUsage_t;
  
-/// OS Runtime Object Memory Usage variables
-extern osRtxObjectMemUsage_t osRtxThreadMemUsage;
-extern osRtxObjectMemUsage_t osRtxTimerMemUsage;
-extern osRtxObjectMemUsage_t osRtxEventFlagsMemUsage;
-extern osRtxObjectMemUsage_t osRtxMutexMemUsage;
-extern osRtxObjectMemUsage_t osRtxSemaphoreMemUsage;
-extern osRtxObjectMemUsage_t osRtxMemoryPoolMemUsage;
-extern osRtxObjectMemUsage_t osRtxMessageQueueMemUsage;
- 
- 
+
 //  ==== OS API definitions ====
  
 // Object Limits definitions
