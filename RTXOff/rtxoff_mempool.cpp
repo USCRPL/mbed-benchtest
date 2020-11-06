@@ -448,7 +448,6 @@ static osStatus_t svcRtxMemoryPoolDelete(osMemoryPoolId_t mp_id) {
         // at this point a new thread might potentially take over
         ThreadDispatcher::instance().dispatch(nullptr);
 
-        // TODO unclear whether the above is enough
         if (ThreadDispatcher::instance().thread.run.curr->state != osRtxThreadRunning) {
             // other thread has higher priority, switch to it
             ThreadDispatcher::instance().blockUntilWoken();

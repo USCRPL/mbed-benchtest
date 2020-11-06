@@ -16,10 +16,10 @@ The implementation of MBed's RTX RTOS for the host OS. Implements the CMSIS API.
 Taken from [this repository](https://github.com/xpacks/arm-cmsis-rtos-validator), this validator is used to validate the RTXOff implementation
 
 ##### events
-TODO, guessing those are additional tests for Events specifically?
+Tests for the Mbed OS event queue functionality.  We used these to help validate that both threads and event queues were working. 
 
-##### med-testing-frameworks
-TODO, I'm unfamiliar with these frameworks and how they're used.
+##### mbed-testing-frameworks
+Dependencies for Mbed unit tests such as those in the events folder.  Modified by us to run on desktop.
 
 ### Detailed behavior
 RTXOff uses nearly the same exact same thread scheduling code as RTX itself, so its thread switching behavior should be very similar to that of the RTOS on a real target.  Just like RTX, the scheduler will always immediately switch to the highest priority thread that can currently run.  Also note that at most one RTX thread can be running (as in, not suspended) at the same time.
@@ -29,7 +29,7 @@ The only place where RTXOff will have different behavior than RTX is preemptive 
 
 Note that these timing inaccuracies also apply to timed waits in certain cases because it can take a fair amount of time for the scheduler to wake up from sleep or switch away from the idle thread.  On real systems I see about +-20ms accuracy on timeouts and delay times using the more accurate `RTXOFF_USE_PROCESS_CLOCK=1` setting (measured using the kernel's own clock).  On a real system, these would be accurate to the scheduler tick (default 1ms).  Note that this is _only_ an issue with wait timeouts -- thread switches due to one thread blocking (or doing something else that causes a switch such as starting a new high-priority thread) happen almost immediately, just like the real processor.
 
-#### Interrupt suppors
+#### Interrupt support
 RTXOff supports interrupts, using the standard [NVIC interrupt functions](https://www.keil.com/pack/doc/CMSIS/Core/html/group__NVIC__gr.html).  This allows you to test code that uses interrupts in a reasonable way -- just write testing code that calls NVIC_EnableIRQ() at the appropriate time to trigger an interrupt in your code.  Note that the NVIC_XXX functions are safe to call from any thread, unlike all other cmsis-rtos API functions which are only safe to call from RTOS threads.  RTXOff interrupts do support priority (the interrupt with lowest priority value will be delivered first if multiple are triggered), but they do *not* support interrupting a currently executing interrupt with another interrupt (which is what happens on the processor if a higher priority interrupt is triggered).  Instead, the new interrupt will be executed as soon as the current one returns.
 
 ### Current Limitations / Things to Know
