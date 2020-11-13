@@ -161,6 +161,13 @@ void ThreadDispatcher::dispatchForever()
 		{
 			processInterrupts();
 			processQueuedISRData();
+
+			// load thread that interrupt handlers say to use
+			if(thread.run.next != nullptr)
+			{
+				thread.run.curr = thread.run.next;
+				thread.run.next = nullptr;
+			}
 		}
 
 		// regardless of what else happened, check if enough time has passed to deliver a tick.
@@ -380,6 +387,9 @@ void ThreadDispatcher::processQueuedISRData()
 				break;
 		}
 	}
+
+	// switch to next preferred thread
+	dispatch(nullptr);
 }
 
 void ThreadDispatcher::delayListInsert(osRtxThread_t *toDelay, uint32_t delay)
