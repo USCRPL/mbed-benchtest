@@ -329,7 +329,7 @@ typedef struct {
 /// \param         msg_count     maximum number of messages in queue.
 /// \param         msg_size      maximum message size in bytes.
 #define osRtxMessageQueueMemSize(msg_count, msg_size) \
-  (4*(msg_count)*(3+(((msg_size)+3)/4)))
+  (4*(msg_count)*(sizeof(osRtxMessage_t)/4+(((msg_size)+3)/4)))
  
  
 //  ==== OS External Functions ====

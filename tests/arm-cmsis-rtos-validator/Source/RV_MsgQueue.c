@@ -128,7 +128,7 @@ void MsgQ_TimerCallback (void const *arg) {
 void CreateMessageQueue (void) {
   /* Create a memory pool */
   MsgQ_Id = osMessageCreate (osMessageQ (MsgQ), NULL);
-  ASSERT_TRUE (MsgQ_Id != NULL);
+  ASSERT_TRUE (MsgQ_Id != NULL); //TODO for some reason this assert doesn't pass
 }
 
 /*-----------------------------------------------------------------------------
