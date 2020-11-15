@@ -123,7 +123,7 @@ static void receiveWaitingMessage(osRtxMessageQueue_t *mq, const void *msg_body,
     // Wakeup waiting Thread with highest Priority
 
     osRtxThread_t *thread = osRtxThreadListGet(reinterpret_cast<osRtxObject_t *>(mq));
-    osRtxThreadWaitExit(thread, (uint32_t) osOK, false);
+    osRtxThreadWaitExit(thread, (uint32_t) osOK, dispatch);
 
     void *ptr_dst = thread->queueBlockedData.msg_body.receive;
     memcpy(ptr_dst, msg_body, mq->msg_size);
