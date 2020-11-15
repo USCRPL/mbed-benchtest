@@ -100,12 +100,12 @@ static void MessageQueueRemove(osRtxMessageQueue_t *mq, const osRtxMessage_t *ms
     }
 }
 
-static void sendWaitingMessage(osRtxMessageQueue_t *mq) {
+static void sendWaitingMessage(osRtxMessageQueue_t *mq, bool dispatch) {
     auto *msg = static_cast<osRtxMessage_t *>(osRtxMemoryPoolAlloc(&mq->mp_info));
     if (msg != nullptr) {
         // Wakeup waiting Thread with highest Priority
         osRtxThread_t *thread = osRtxThreadListGet(reinterpret_cast<osRtxObject_t *>(mq));
-        osRtxThreadWaitExit(thread, (uint32_t) osOK, false);
+        osRtxThreadWaitExit(thread, (uint32_t) osOK, dispatch);
 
         const void *ptr_src = thread->queueBlockedData.msg_body.send;
         memcpy(&msg[1], ptr_src, mq->msg_size);
@@ -119,7 +119,7 @@ static void sendWaitingMessage(osRtxMessageQueue_t *mq) {
     }
 }
 
-static void receiveWaitingMessage(osRtxMessageQueue_t *mq, const void *msg_body, uint8_t msg_prio) {
+static void receiveWaitingMessage(osRtxMessageQueue_t *mq, const void *msg_body, uint8_t msg_prio, bool dispatch) {
     // Wakeup waiting Thread with highest Priority
 
     osRtxThread_t *thread = osRtxThreadListGet(reinterpret_cast<osRtxObject_t *>(mq));
@@ -152,7 +152,7 @@ static void osRtxMessageQueuePostProcess(osRtxMessage_t *msg) {
         (void) osRtxMemoryPoolFree(&mq->mp_info, msg);
         // Check if Thread is waiting to send a Message
         if (mq->thread_list != nullptr) {
-            sendWaitingMessage(mq);
+            sendWaitingMessage(mq, false);
         }
     } else {
         // New Message
@@ -160,7 +160,7 @@ static void osRtxMessageQueuePostProcess(osRtxMessage_t *msg) {
 
         // Check if Thread is waiting to receive a Message
         if ((mq->thread_list != nullptr) && (mq->thread_list->state == osRtxThreadWaitingMessageGet)) {
-            receiveWaitingMessage(mq, &msg[1], msg->priority);
+            receiveWaitingMessage(mq, &msg[1], msg->priority, false);
 
             // Free memory
             msg->id = osRtxIdInvalid;
@@ -324,9 +324,7 @@ osMessageQueuePut(osMessageQueueId_t mq_id, const void *msg_ptr, uint8_t msg_pri
 
     // Check if Thread is waiting to receive a Message
     if (!isISR && (mq->thread_list != nullptr) && (mq->thread_list->state == osRtxThreadWaitingMessageGet)) {
-        receiveWaitingMessage(mq, msg_ptr, msg_prio);
-
-        ThreadDispatcher::instance().dispatch(nullptr);
+        receiveWaitingMessage(mq, msg_ptr, msg_prio, true);
 
         if (ThreadDispatcher::instance().thread.run.curr->state != osRtxThreadRunning) {
             // other thread has higher priority, switch to it
@@ -433,8 +431,7 @@ osStatus_t osMessageQueueGet(osMessageQueueId_t mq_id, void *msg_ptr, uint8_t *m
         if (mq->thread_list != nullptr) {
             // Try to allocate memory
             //lint -e{9079} "conversion from pointer to void to pointer to other type" [MISRA Note 5]
-            sendWaitingMessage(mq);
-            ThreadDispatcher::instance().dispatch(nullptr);
+            sendWaitingMessage(mq, true);
 
             if (ThreadDispatcher::instance().thread.run.curr->state != osRtxThreadRunning) {
                 // other thread has higher priority, switch to it
@@ -563,7 +560,7 @@ osStatus_t osMessageQueueReset(osMessageQueueId_t mq_id) {
     // Check if Threads are waiting to send Messages
     if ((mq->thread_list != nullptr) && (mq->thread_list->state == osRtxThreadWaitingMessagePut)) {
         do {
-            sendWaitingMessage(mq);
+            sendWaitingMessage(mq, false);
         } while (mq->thread_list != nullptr);
 
         ThreadDispatcher::instance().dispatch(nullptr);
