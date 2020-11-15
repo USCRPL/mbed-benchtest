@@ -35,7 +35,7 @@ osTimerDef (MsgQ_PeriodicTimer, MsgQ_TimerCallback);
 
 /* Definitions for TC_MsgQWait */
 void Th_MsgWait (void const *arg);
-osThreadDef (Th_MsgWait, osPriorityAboveNormal, 1, 0);
+osThreadDef (Th_MsgWait, osPriorityAboveNormal, 1);
 
 uint8_t MsgWaitCnt;
 

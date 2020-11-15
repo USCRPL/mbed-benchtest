@@ -87,6 +87,7 @@ public:
 		} run;
 		osRtxObject_t 				 ready;  ///< Ready List Object.  Linked list of threads sorted by priority.
 		osRtxThread_t               *idle;  ///< Idle Thread
+		osRtxThread_t               *timer;  ///< Timer Thread
 		osRtxThread_t         *delay_list;  ///< Delay List
 		osRtxThread_t          *wait_list;  ///< Wait List (no Timeout)
 		osRtxThread_t     *terminate_list;  ///< Terminate Thread List

@@ -95,14 +95,14 @@ extern "C"
 #define osRtxThreadWaitingMemoryPool    ((uint8_t)(osRtxThreadBlocked | 0x70U))
 #define osRtxThreadWaitingMessageGet    ((uint8_t)(osRtxThreadBlocked | 0x80U))
 #define osRtxThreadWaitingMessagePut    ((uint8_t)(osRtxThreadBlocked | 0x90U))
- 
+
 /// Thread Flags definitions
 #define osRtxThreadFlagDefStack 0x10U   ///< Default Stack flag
- 
+
 /// Stack Marker definitions
 #define osRtxStackMagicWord     0xE25A2EA5U ///< Stack Magic Word (Stack Base)
 #define osRtxStackFillPattern   0xCCCCCCCCU ///< Stack Fill Pattern 
- 
+
 /// Thread Control Block
 typedef struct osRtxThread_s {
   uint8_t                          id;  ///< Object Identifier
@@ -127,8 +127,20 @@ typedef struct osRtxThread_s {
   uint64_t waitExitVal;                 // return value passed from osRtxThreadWaitExit().  Set only when this function is called, not when a thread wait timeout expires.
   uint8_t waitValPresent;               // Whether above value is present.
 
-  os_thread_id osThread;
-  struct thread_suspender_data * suspenderData;
+    // when a queue is blocked on a get or put, it will store its information here
+    struct {
+        union {
+            void *receive;
+            const void *send;
+        } msg_body;
+        union {
+          uint8_t *receive;
+          uint8_t send;
+        } msg_prio;
+    } queueBlockedData;
+
+    os_thread_id osThread;
+    struct thread_suspender_data *suspenderData;
 
   // start data
   osThreadFunc_t start_func;
@@ -240,7 +252,7 @@ typedef struct {
  
  
 //  ==== Message Queue definitions ====
- 
+
 /// Message Control Block
 typedef struct osRtxMessage_s {
   uint8_t                          id;  ///< Object Identifier

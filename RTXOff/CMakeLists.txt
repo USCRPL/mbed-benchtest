@@ -33,6 +33,8 @@ set(RTX_OFF_SOURCES
 	rtxoff_evflags.cpp
 	rtxoff_semaphore.cpp
 	rtxoff_mempool.cpp
+	rtxoff_msgqueue.cpp
+	rtxoff_timer.cpp
 	ThreadDispatcher.cpp
 	ThreadDispatcher.h
 	rtxoff_clock.h
