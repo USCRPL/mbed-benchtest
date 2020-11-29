@@ -55,7 +55,11 @@ target_link_libraries(rtxoff Threads::Threads)
 # Turn off exceptions.  On some platforms pthread_exit() uses an exception to unwind the stack,
 # and this causes issues (SIGABRT when an exception propagates out of a pthread function).
 # RTXOff will CRASH INTERMITTENTLY on Linux without this option!
-target_compile_options(rtxoff PUBLIC -fno-exceptions)
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag(-fno-exceptions SUPPORTS_FNO_EXCEPTIONS)
+if(SUPPORTS_FNO_EXCEPTIONS)
+	target_compile_options(rtxoff PUBLIC -fno-exceptions)
+endif()
 
 # detect windows vs linux
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")

@@ -128,7 +128,6 @@ static void osRtxMemoryPoolPostProcess(osRtxMemoryPool_t *mp) {
     }
 }
 
-
 //  ==== Service Calls ====
 
 /// Create and Initialize a Memory Pool object.

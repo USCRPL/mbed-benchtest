@@ -40,7 +40,7 @@ static void MessageQueuePut(osRtxMessageQueue_t *mq, osRtxMessage_t *msg) {
         mq->msg_last = msg;
     }
 
-    __atomic_fetch_add(&mq->msg_count, 1, __ATOMIC_RELAXED);
+    mq->msg_count++;
 }
 
 /// Get a Message from Queue with Highest Priority.
@@ -52,24 +52,19 @@ static osRtxMessage_t *MessageQueueGet(osRtxMessageQueue_t *mq) {
     uint32_t count;
     uint8_t flags;
 
-
-    do {
-        count = mq->msg_count;
-        if (count == 0U) {
-            break;
-        }
-    } while (!__sync_bool_compare_and_swap(&mq->msg_count, count, count - 1));
+    count = mq->msg_count;
+    if (count != 0U) {
+        mq->msg_count--;
+    }
 
     if (count != 0U) {
         msg = mq->msg_first;
 
-        while (msg != nullptr) {
-            {
-                ThreadDispatcher::Mutex mutex;
+        while (msg != nullptr) 
+        {
+            flags = msg->flags;
+            msg->flags = 1U;
 
-                flags = msg->flags;
-                msg->flags = 1U;
-            }
             if (flags == 0U) {
                 break;
             }

@@ -151,7 +151,7 @@ uint32_t osKernelGetTickFreq (void) {
 /// Get the RTOS kernel system timer count.
 /// This should be finer grain than the tick count.
 uint32_t osKernelGetSysTimerCount (void) {
-	return RTXClock::now().time_since_epoch().count();
+	return static_cast<uint32_t>(RTXClock::now().time_since_epoch().count());
 }
 
 /// Get the RTOS kernel system timer frequency.

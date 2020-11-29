@@ -16,6 +16,12 @@
 #  include <condition_variable>
 #endif
 
+#if USE_WINTHREAD
+// get Windows equivalent of this needed GCC intrinsic
+#include <intrin.h>
+#define __builtin_clz(x) __lzcnt(x)
+#endif
+
 // RTXOff Debugging (to cerr, so that it is in correct order)
 #define RTXOFF_DEBUG 0
 

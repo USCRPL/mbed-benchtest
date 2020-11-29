@@ -273,7 +273,7 @@ uint32_t osEventFlagsWait (osEventFlagsId_t ef_id, uint32_t flags, uint32_t opti
 
 			if(thread->waitValPresent)
 			{
-				event_flags = thread->waitExitVal;
+				event_flags = static_cast<uint32_t>(thread->waitExitVal);
 				thread->waitValPresent = false;
 			}
 			else

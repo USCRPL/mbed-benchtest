@@ -1,4 +1,5 @@
 #include "rtxoff_clock.h"
+#include "rtxoff_internal.h"
 
 using namespace std::chrono;
 

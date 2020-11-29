@@ -19,10 +19,10 @@ extern "C" int mbed_start();
 void mbed_rtos_init_singleton_mutex(void)
 {
 	const osMutexAttr_t singleton_mutex_attr = {
-			.name = "singleton_mutex",
-			.attr_bits = osMutexRecursive | osMutexPrioInherit | osMutexRobust,
-			.cb_mem = &singleton_mutex_obj,
-			.cb_size = sizeof(singleton_mutex_obj)
+			"singleton_mutex",
+			osMutexRecursive | osMutexPrioInherit | osMutexRobust,
+			&singleton_mutex_obj,
+			sizeof(singleton_mutex_obj)
 	};
 	singleton_mutex_id = osMutexNew(&singleton_mutex_attr);
 }
