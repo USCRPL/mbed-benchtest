@@ -78,6 +78,9 @@ static void osRtxTimerTick(void) {
         TimerUnlink(timer);
         status = osMessageQueuePut(ThreadDispatcher::instance().timer.mq, &timer->finfo, 0U, 0U);
         if (status != osOK) {
+#if RTXOFF_DEBUG
+            std::cerr << "cannot put timer in queue (status=" << status << ")" << std::endl;
+#endif
             // TODO throw or something
             //(void) osRtxErrorNotify(osRtxErrorTimerQueueOverflow, timer);
         }

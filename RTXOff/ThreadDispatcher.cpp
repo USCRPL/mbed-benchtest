@@ -20,6 +20,8 @@ ThreadDispatcher &ThreadDispatcher::instance()
 	return instance;
 }
 
+thread_local bool isDispatcher = false;
+
 #if USE_WINTHREAD
 ThreadDispatcher::ThreadDispatcher()
 {
@@ -105,6 +107,7 @@ void ThreadDispatcher::requestSchedule()
 
 void ThreadDispatcher::dispatchForever()
 {
+    isDispatcher = true;
 	while(true)
 	{
 		// Dispatch the current thread
@@ -190,37 +193,47 @@ void ThreadDispatcher::switchNextThread(osRtxThread_t * nextThread)
 	thread.run.next = nextThread;
 }
 
-void ThreadDispatcher::dispatch(osRtxThread_t *toDispatch)
-{
-	if (toDispatch == nullptr)
-	{
-		osRtxThread_t * thread_ready = thread.ready.thread_list;
-		if ((kernel.state == osRtxKernelRunning) &&
-			(thread_ready != NULL) &&
-			(thread_ready->priority > thread.run.curr->priority))
-		{
+void ThreadDispatcher::dispatch(osRtxThread_t *toDispatch) {
+    osRtxThread_t *th;
+
+    if (thread.run.next != nullptr &&
+        thread.run.curr->state != osRtxThreadRunning &&
+        thread.run.next->state == osRtxThreadRunning) {
+        // we already had a dispatch that blocked the curr thread and
+        // made thread at next running
+        th = thread.run.next;
+    } else {
+        th = thread.run.curr;
+    }
+
+    if (toDispatch == nullptr) {
+        osRtxThread_t *thread_ready = thread.ready.thread_list;
+
+        if (kernel.state == osRtxKernelRunning &&
+            thread_ready != nullptr &&
+            thread_ready->priority > th->priority) {
 #if RTXOFF_DEBUG
-			std::cerr << thread_ready->name << " is higher priority than the current thread " << thread.run.curr->name << ", switching to it now." << std::endl;
+            std::cerr << thread_ready->name << " is higher priority than the current (or next) thread " << th->name << ", switching to it now." << std::endl;
 #endif
 			// Preempt running Thread
-			osRtxThreadListRemove(thread_ready);
-			osRtxThreadBlock(thread.run.curr);
-			switchNextThread(thread_ready);
-		}
-	}
-	else
-	{
-		if ((kernel.state == osRtxKernelRunning) &&
-			(toDispatch->priority > thread.run.curr->priority))
-		{
-			// Preempt running Thread
-			osRtxThreadBlock(thread.run.curr);
-			switchNextThread(toDispatch);
-		} else {
-			// Put Thread into Ready list
-			osRtxThreadReadyPut(toDispatch);
-		}
-	}
+            osRtxThreadListRemove(thread_ready);
+            osRtxThreadBlock(th);
+            switchNextThread(thread_ready);
+        }
+    } else {
+        if ((kernel.state == osRtxKernelRunning) &&
+            (toDispatch->priority > th->priority)) {
+            // Preempt running Thread
+            osRtxThreadBlock(th);
+            switchNextThread(toDispatch);
+#if RTXOFF_DEBUG
+            std::cerr << toDispatch->name << " is higher priority than the current (or next) thread " << th->name << ", switching to it now." << std::endl;
+#endif
+        } else {
+            // Put Thread into Ready list
+            osRtxThreadReadyPut(toDispatch);
+        }
+    }
 }
 
 void ThreadDispatcher::onTick()
@@ -280,8 +293,14 @@ void ThreadDispatcher::blockUntilWoken()
 	// save current thread at the start of the function call.
 	osRtxThread_t * currThread = thread.run.curr;
 
-	requestSchedule();
-	unlockMutex();
+    if (isDispatcher) {
+        // cannot block dispatcher. Not a bug; used when the dispatcher uses
+        // calls that switch threads like putting something into a queue.
+        return;
+    }
+
+    requestSchedule();
+    unlockMutex();
 
 	// The scheduler thread is now ready to run.  So all we need to do to run it
 	// (and switch to another thread) is yield the processor. For loop there in case
