@@ -1,0 +1,17 @@
+name: Run Tests
+
+on: pull_request
+
+jobs:
+    build_test_linux:
+        name: Build and test on Linux
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Check out repo
+                uses: actions/checkout@v2
+            
+            -   name: Compile
+                run: bash -ex .github/workflows/compile-mbed-benchtest.sh
+        
+            -   name: Run Tests
+                run: bash -ex .github/workflows/build-hamster.sh
