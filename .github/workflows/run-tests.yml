@@ -14,4 +14,4 @@ jobs:
                 run: bash -ex .github/workflows/compile-mbed-benchtest.sh
         
             -   name: Run Tests
-                run: bash -ex .github/workflows/build-hamster.sh
+                run: bash -ex .github/workflows/run-tests.sh
