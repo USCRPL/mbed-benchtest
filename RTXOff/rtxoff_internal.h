@@ -20,7 +20,7 @@
 #if USE_WINTHREAD
 // get Windows equivalent of this needed GCC intrinsic
 #include <intrin.h>
-//#define __builtin_clz(x) __lzcnt(x)
+#define __builtin_clz(x) __lzcnt(x)
 #endif
 
 // handle thread yield function
