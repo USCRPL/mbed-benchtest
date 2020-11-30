@@ -43,7 +43,7 @@ set(RTX_OFF_SOURCES
 	thread_suspender.cpp
 
 	# program entry point
-	rtxoff_main.cpp thread_suspender.h)
+	rtxoff_main.cpp)
 
 add_library(rtxoff STATIC ${RTX_OFF_SOURCES})
 target_link_libraries(rtxoff)
@@ -72,10 +72,17 @@ else()
 
 	# check if the nonstandard pthread_setname_np() function exists
 	set(CMAKE_REQUIRED_LIBRARIES Threads::Threads)
-	check_all_functions(pthread_setname_np)
+	check_all_functions(pthread_setname_np pthread_yield sched_yield)
 
 	if(HAVE_PTHREAD_SETNAME_NP)
 		target_compile_definitions(rtxoff PRIVATE HAVE_PTHREAD_SETNAME_NP)
+	endif()
+
+	if(NOT (HAVE_PTHREAD_YIELD OR HAVE_SCHED_YIELD))
+		message(FATAL_ERROR "Your system does not provide pthread_yield() or sched_yield().  RTXOff cannot build.")
+	endif()
+	if(HAVE_PTHREAD_YIELD)
+		target_compile_definitions(rtxoff PRIVATE HAVE_PTHREAD_YIELD)
 	endif()
 endif()
 

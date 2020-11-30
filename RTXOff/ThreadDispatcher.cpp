@@ -314,11 +314,7 @@ void ThreadDispatcher::blockUntilWoken() {
     // (and switch to another thread) is yield the processor. For loop there in case
     // of timing weirdness.
     while (currThread->state != osRtxThreadRunning) {
-#if USE_WINTHREAD
-        SwitchToThread();
-#else
-        pthread_yield();
-#endif
+		rtxoff_thread_yield();
     }
 
     lockMutex();
