@@ -15,3 +15,16 @@ jobs:
         
             -   name: Run Tests
                 run: bash -ex .github/workflows/run-tests.sh
+                
+    build_test_mac:
+        name: Build and test on Mac
+        runs-on: macos-latest
+        steps:
+            -   name: Check out repo
+                uses: actions/checkout@v2
+            
+            -   name: Compile
+                run: bash -ex .github/workflows/compile-mbed-benchtest.sh
+        
+            -   name: Run Tests
+                run: bash -ex .github/workflows/run-tests.sh
