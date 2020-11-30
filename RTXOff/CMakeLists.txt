@@ -95,6 +95,12 @@ else()
 	if(PTHREAD_SETNAME_NP_WORKS)
 		target_compile_definitions(rtxoff PRIVATE HAVE_PTHREAD_SETNAME_NP)
 	endif()
+
+	# tell code to use more limited timing functions available on OS X
+	if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+		target_compile_definitions(rtxoff PRIVATE USE_MAC_TIME)
+	endif()
+
 endif()
 
 # manually apply mbed configs

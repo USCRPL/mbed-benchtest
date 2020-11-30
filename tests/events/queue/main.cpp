@@ -302,8 +302,8 @@ void time_left_test()
     EventQueue queue(TEST_EQUEUE_SIZE);
 
     // Enque check events
-    TEST_ASSERT(queue.call_in(500ms, check_time_left, &queue, 0, 100 - 500));
-    TEST_ASSERT(queue.call_in(2000ms, check_time_left, &queue, 1, 200 - 2000));
+    TEST_ASSERT(queue.call_in(500ms, check_time_left, &queue, 0, 1000 - 500));
+    TEST_ASSERT(queue.call_in(2000ms, check_time_left, &queue, 1, 2000 - 2000));
 
     // Enque events to be checked
     timeleft_events[0] = queue.call_in(1000ms, time_left, &queue, 0);
@@ -311,7 +311,7 @@ void time_left_test()
     TEST_ASSERT(timeleft_events[0]);
     TEST_ASSERT(timeleft_events[1]);
 
-    queue.dispatch(300);
+    queue.dispatch(3000);
 
     // Ensure check was called
     TEST_ASSERT(touched);

@@ -54,6 +54,9 @@ ThreadDispatcher::ThreadDispatcher()
 
     pthread_mutexattr_destroy(&recursiveAttr);
 
+#ifdef USE_MAC_TIME
+        pthread_cond_init(&kernelModeCondVar, nullptr);
+#else
     // initialize kernel mode cond var
     // make sure that the condition variable is using the monotonic clock
     pthread_condattr_t monotonicClockAttr;
@@ -61,6 +64,7 @@ ThreadDispatcher::ThreadDispatcher()
     pthread_condattr_setclock(&monotonicClockAttr, CLOCK_MONOTONIC); // sadly CLOCK_PROCESS_CPUTIME_ID is not supported here
 
     pthread_cond_init(&kernelModeCondVar, &monotonicClockAttr);
+#endif
 
     pthread_condattr_destroy(&monotonicClockAttr);
 }
