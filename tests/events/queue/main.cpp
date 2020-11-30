@@ -302,12 +302,12 @@ void time_left_test()
     EventQueue queue(TEST_EQUEUE_SIZE);
 
     // Enque check events
-    TEST_ASSERT(queue.call_in(50ms, check_time_left, &queue, 0, 100 - 50));
-    TEST_ASSERT(queue.call_in(200ms, check_time_left, &queue, 1, 200 - 200));
+    TEST_ASSERT(queue.call_in(500ms, check_time_left, &queue, 0, 100 - 500));
+    TEST_ASSERT(queue.call_in(2000ms, check_time_left, &queue, 1, 200 - 2000));
 
     // Enque events to be checked
-    timeleft_events[0] = queue.call_in(100ms, time_left, &queue, 0);
-    timeleft_events[1] = queue.call_in(200ms, time_left, &queue, 1);
+    timeleft_events[0] = queue.call_in(1000ms, time_left, &queue, 0);
+    timeleft_events[1] = queue.call_in(2000ms, time_left, &queue, 1);
     TEST_ASSERT(timeleft_events[0]);
     TEST_ASSERT(timeleft_events[1]);
 
@@ -500,6 +500,13 @@ void static_events_queue_test()
     TEST_ASSERT_EQUAL(6, test2.counter);
     TEST_ASSERT_EQUAL(30, test3.counter);
     TEST_ASSERT_EQUAL(15, test4.counter);
+
+    // cancel all events to prevent assertion failure when program shuts down
+    ue0.cancel();
+    ue1.cancel();
+    ue2.cancel();
+    ue3.cancel();
+    ue4.cancel();
 }
 
 // Test setup
