@@ -23,7 +23,9 @@
 #endif
 
 // RTXOff Debugging (to cerr, so that it is in correct order)
-#define RTXOFF_DEBUG 0
+#ifndef RTXOFF_DEBUG
+#define RTXOFF_DEBUG 1
+#endif
 
 // Kernel functions
 void rtxOffDefaultIdleFunc();

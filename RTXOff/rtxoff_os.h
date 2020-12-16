@@ -324,16 +324,21 @@ typedef struct {
 /// \param         block_size    memory block size in bytes.
 #define osRtxMemoryPoolMemSize(block_count, block_size) \
   (4*(block_count)*(((block_size)+3)/4))
- 
+
 /// Memory size in bytes for Message Queue storage.
 /// \param         msg_count     maximum number of messages in queue.
 /// \param         msg_size      maximum message size in bytes.
+#if RTXOFF_USE_32BIT
 #define osRtxMessageQueueMemSize(msg_count, msg_size) \
   (4*(msg_count)*(sizeof(osRtxMessage_t)/4+(((msg_size)+3)/4)))
- 
- 
+#else
+#define osRtxMessageQueueMemSize(msg_count, msg_size) \
+  (4*(msg_count)*(sizeof(osRtxMessage_t)/4+(((msg_size+7U)&~7UL)/4)))
+#endif
+
+
 //  ==== OS External Functions ====
- 
+
 // OS Error Codes
 #define osRtxErrorStackUnderflow        1U  ///< Stack overflow, i.e. stack pointer below its lower memory limit for descending stacks.
 #define osRtxErrorISRQueueOverflow      2U  ///< ISR Queue overflow detected when inserting object.

@@ -9,15 +9,13 @@ ThreadDispatcher::Mutex::Mutex()
 	instance().lockMutex();
 }
 
-ThreadDispatcher::Mutex::~Mutex()
-{
-	instance().unlockMutex();
+ThreadDispatcher::Mutex::~Mutex() {
+    instance().unlockMutex();
 }
 
-ThreadDispatcher &ThreadDispatcher::instance()
-{
-	static ThreadDispatcher instance;
-	return instance;
+ThreadDispatcher &ThreadDispatcher::instance() {
+    static ThreadDispatcher instance;
+    return instance;
 }
 
 thread_local bool isDispatcher = false;
@@ -25,23 +23,23 @@ thread_local bool isDispatcher = false;
 #if USE_WINTHREAD
 ThreadDispatcher::ThreadDispatcher()
 {
-	InitializeConditionVariable(&kernelModeCondVar);
-	InitializeCriticalSection(&kernelDataMutex);
+    InitializeConditionVariable(&kernelModeCondVar);
+    InitializeCriticalSection(&kernelDataMutex);
 }
 
 void ThreadDispatcher::lockMutex()
 {
-	EnterCriticalSection(&kernelDataMutex);
+    EnterCriticalSection(&kernelDataMutex);
 }
 
 void ThreadDispatcher::unlockMutex()
 {
-	LeaveCriticalSection(&kernelDataMutex);
+    LeaveCriticalSection(&kernelDataMutex);
 }
 
 void ThreadDispatcher::requestSchedule()
 {
-	WakeConditionVariable(&kernelModeCondVar);
+    WakeConditionVariable(&kernelModeCondVar);
 }
 #else
 
@@ -111,6 +109,9 @@ void ThreadDispatcher::dispatchForever()
 	while(true)
 	{
 		// Dispatch the current thread
+#if RTXOFF_DEBUG && RTXOFF_VERBOSE
+        std::cerr << "Resuming thread " << thread.run.curr->name << std::endl;
+#endif
 		thread_suspender_resume(thread.run.curr->osThread, thread.run.curr->suspenderData);
 
         // wait on the kernel mode cond var
@@ -130,7 +131,10 @@ void ThreadDispatcher::dispatchForever()
 		if(thread.run.curr != nullptr)
 		{
 			// current thread still exists, try to suspend it
-			thread_suspender_suspend(thread.run.curr->osThread, thread.run.curr->suspenderData);
+#if RTXOFF_DEBUG && RTXOFF_VERBOSE
+            std::cerr << "Suspending thread " << thread.run.curr->name << std::endl;
+#endif
+            thread_suspender_suspend(thread.run.curr->osThread, thread.run.curr->suspenderData);
 		}
 
 		if(!interrupt.enabled)
@@ -149,6 +153,9 @@ void ThreadDispatcher::dispatchForever()
 		if(thread.run.next != nullptr)
 		{
 			// one of the RTX functions has triggered us to switch to a different thread.
+#if RTXOFF_DEBUG && RTXOFF_VERBOSE
+            std::cerr << "Curr is now " << thread.run.next->name << std::endl;
+#endif
 			thread.run.curr = thread.run.next;
 			thread.run.next = nullptr;
 		}
@@ -168,6 +175,9 @@ void ThreadDispatcher::dispatchForever()
 			// load thread that interrupt handlers say to use
 			if(thread.run.next != nullptr)
 			{
+#if RTXOFF_DEBUG && RTXOFF_VERBOSE
+                std::cerr << "Curr is now " << thread.run.next->name << std::endl;
+#endif
 				thread.run.curr = thread.run.next;
 				thread.run.next = nullptr;
 			}
@@ -179,6 +189,10 @@ void ThreadDispatcher::dispatchForever()
 			// deliver the next tick
 			onTick();
 
+#if RTXOFF_DEBUG && RTXOFF_VERBOSE
+            if (thread.run.next != thread.run.curr)
+                std::cerr << "Curr is now " << thread.run.next->name << std::endl;
+#endif
 			// load thread that tick handler says to use
 			thread.run.curr = thread.run.next;
 			thread.run.next = nullptr;
@@ -288,10 +302,9 @@ void ThreadDispatcher::onTick()
 	}
 }
 
-void ThreadDispatcher::blockUntilWoken()
-{
-	// save current thread at the start of the function call.
-	osRtxThread_t * currThread = thread.run.curr;
+void ThreadDispatcher::blockUntilWoken() {
+    // save current thread at the start of the function call.
+    osRtxThread_t *currThread = thread.run.curr;
 
     if (isDispatcher) {
         // cannot block dispatcher. Not a bug; used when the dispatcher uses
@@ -302,19 +315,18 @@ void ThreadDispatcher::blockUntilWoken()
     requestSchedule();
     unlockMutex();
 
-	// The scheduler thread is now ready to run.  So all we need to do to run it
-	// (and switch to another thread) is yield the processor. For loop there in case
-	// of timing weirdness.
-	while(currThread->state != osRtxThreadRunning)
-	{
+    // The scheduler thread is now ready to run.  So all we need to do to run it
+    // (and switch to another thread) is yield the processor. For loop there in case
+    // of timing weirdness.
+    while (currThread->state != osRtxThreadRunning) {
 #if USE_WINTHREAD
-		SwitchToThread();
+        SwitchToThread();
 #else
         pthread_yield();
 #endif
-	}
+    }
 
-	lockMutex();
+    lockMutex();
 }
 
 bool ThreadDispatcher::updateTick()
@@ -411,77 +423,83 @@ void ThreadDispatcher::processQueuedISRData()
 	dispatch(nullptr);
 }
 
-void ThreadDispatcher::delayListInsert(osRtxThread_t *toDelay, uint32_t delay)
-{
-	osRtxThread_t *prev, *next;
+void ThreadDispatcher::delayListInsert(osRtxThread_t *toDelay, uint32_t delay) {
 
-	if (delay == osWaitForever)
-	{
-		// append to end
-		prev = NULL;
-		next = thread.wait_list;
-		while (next != NULL)
-		{
-			prev = next;
-			next = next->delay_next;
-		}
-		toDelay->delay = delay;
-		toDelay->delay_prev = prev;
-		toDelay->delay_next = NULL;
-		if (prev != NULL) {
-			prev->delay_next = toDelay;
-		} else {
-			thread.wait_list = toDelay;
-		}
-	}
-	else
-	{
-		prev = NULL;
-		next = thread.delay_list;
-		while ((next != NULL) && (next->delay <= delay)) {
-			delay -= next->delay;
-			prev = next;
-			next = next->delay_next;
-		}
-		toDelay->delay = delay;
-		toDelay->delay_prev = prev;
-		toDelay->delay_next = next;
-		if (prev != NULL) {
-			prev->delay_next = toDelay;
-		} else {
-			thread.delay_list = toDelay;
-		}
-		if (next != NULL) {
-			next->delay -= delay;
-			next->delay_prev = toDelay;
-		}
-	}
+#if RTXOFF_DEBUG && RTXOFF_VERBOSE
+    std::cerr << "Inserting thread " << toDelay->name << " (" << toDelay << ",prev="
+              << toDelay->delay_prev
+              << ",next=" << toDelay->delay_next << ") into delay list (" << thread.wait_list << ")" << std::endl;
+#endif
+
+    osRtxThread_t *prev, *next;
+
+    if (delay == osWaitForever) {
+        // append to end
+        prev = NULL;
+        next = thread.wait_list;
+        while (next != NULL) {
+            prev = next;
+            next = next->delay_next;
+        }
+        toDelay->delay = delay;
+        toDelay->delay_prev = prev;
+        toDelay->delay_next = NULL;
+        if (prev != NULL) {
+            prev->delay_next = toDelay;
+        } else {
+            thread.wait_list = toDelay;
+        }
+    } else {
+        prev = NULL;
+        next = thread.delay_list;
+        while ((next != NULL) && (next->delay <= delay)) {
+            delay -= next->delay;
+            prev = next;
+            next = next->delay_next;
+        }
+        toDelay->delay = delay;
+        toDelay->delay_prev = prev;
+        toDelay->delay_next = next;
+        if (prev != NULL) {
+            prev->delay_next = toDelay;
+        } else {
+            thread.delay_list = toDelay;
+        }
+        if (next != NULL) {
+            next->delay -= delay;
+            next->delay_prev = toDelay;
+        }
+    }
 }
 
-void ThreadDispatcher::delayListRemove(osRtxThread_t *toRemove)
-{
-	if (toRemove->delay == osWaitForever) {
-		if (toRemove->delay_next != NULL) {
-			toRemove->delay_next->delay_prev = toRemove->delay_prev;
-		}
-		if (toRemove->delay_prev != NULL) {
-			toRemove->delay_prev->delay_next = toRemove->delay_next;
-			toRemove->delay_prev = NULL;
-		} else {
-			thread.wait_list = toRemove->delay_next;
-		}
-	} else {
-		if (toRemove->delay_next != NULL) {
-			toRemove->delay_next->delay += toRemove->delay;
-			toRemove->delay_next->delay_prev = toRemove->delay_prev;
-		}
-		if (toRemove->delay_prev != NULL) {
-			toRemove->delay_prev->delay_next = toRemove->delay_next;
-			toRemove->delay_prev = NULL;
-		} else {
-			thread.delay_list = toRemove->delay_next;
-		}
-	}
+void ThreadDispatcher::delayListRemove(osRtxThread_t *toRemove) {
+#if RTXOFF_DEBUG && RTXOFF_VERBOSE
+    std::cerr << "Removing thread " << toRemove->name << " (" << toRemove << ",prev="
+              << toRemove->delay_prev << ",next=" << toRemove->delay_next << ")" << "from delay list ("
+              << thread.wait_list << ")" << std::endl;
+#endif
+    if (toRemove->delay == osWaitForever) {
+        if (toRemove->delay_next != NULL) {
+            toRemove->delay_next->delay_prev = toRemove->delay_prev;
+        }
+        if (toRemove->delay_prev != NULL) {
+            toRemove->delay_prev->delay_next = toRemove->delay_next;
+            toRemove->delay_prev = NULL;
+        } else {
+            thread.wait_list = toRemove->delay_next;
+        }
+    } else {
+        if (toRemove->delay_next != NULL) {
+            toRemove->delay_next->delay += toRemove->delay;
+            toRemove->delay_next->delay_prev = toRemove->delay_prev;
+        }
+        if (toRemove->delay_prev != NULL) {
+            toRemove->delay_prev->delay_next = toRemove->delay_next;
+            toRemove->delay_prev = NULL;
+        } else {
+            thread.delay_list = toRemove->delay_next;
+        }
+    }
 }
 
 void ThreadDispatcher::delayListTick()

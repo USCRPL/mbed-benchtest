@@ -191,7 +191,12 @@ osMessageQueueId_t osMessageQueueNew(uint32_t msg_count, uint32_t msg_size, cons
         //lint -e{904} "Return statement before end of function" [MISRA Note 1]
         return nullptr;
     }
+
+#if RTXOFF_USE_32BIT
     block_size = ((msg_size + 3U) & ~3UL) + sizeof(osRtxMessage_t);
+#else
+    block_size = ((msg_size + 7U) & ~7UL) + sizeof(osRtxMessage_t);
+#endif
     if ((__builtin_clz(msg_count) + __builtin_clz(block_size)) < 32U) {
 
         //lint -e{904} "Return statement before end of function" [MISRA Note 1]

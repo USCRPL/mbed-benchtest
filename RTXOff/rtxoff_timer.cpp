@@ -70,6 +70,9 @@ static void osRtxTimerTick(void) {
     timer = ThreadDispatcher::instance().timer.list;
     if (timer == nullptr) {
         //lint -e{904} "Return statement before end of function" [MISRA Note 1]
+#if RTXOFF_DEBUG && RTXOFF_VERBOSE
+        std::cerr << "no timers" << std::endl;
+#endif
         return;
     }
 

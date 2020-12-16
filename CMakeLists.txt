@@ -9,7 +9,24 @@ project(mbed-benchtest LANGUAGES C CXX)
 include(cmake/Shorthand.cmake)
 include(CheckFunctionExists)
 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+if (NOT DEFINED RTXOFF_USE_32BIT)
+	set(RTXOFF_USE_32BIT 0)
+endif ()
+add_compile_definitions(RTXOFF_USE_32BIT=${RTXOFF_USE_32BIT})
+
+if (NOT DEFINED RTXOFF_DEBUG AND ${CMAKE_BUILD_TYPE} STREQUAL "Release")
+	set(RTXOFF_DEBUG 0)
+else ()
+	set(RTXOFF_DEBUG 1)
+endif ()
+
+if (NOT DEFINED RTXOFF_VERBOSE)
+	set(RTXOFF_VERBOSE 0)
+endif ()
+
+add_compile_definitions(RTXOFF_DEBUG=${RTXOFF_DEBUG})
+
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 
 	set(CMAKE_CXX_FLAGS_RELEASE "/O2")
 	set(CMAKE_CXX_FLAGS_DEBUG "/MDd /Zi /Ob0 /Od /RTC1")
@@ -28,6 +45,11 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 else()
 	# gcc, clang, etc.
 	add_compile_options(-Wall)
+
+	if (RTXOFF_USE_32BIT)
+		add_definitions("-m32")
+		SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -m32")
+	endif ()
 endif()
 
 set(CMAKE_CXX_STANDARD 14)
