@@ -150,7 +150,7 @@ osTimerId_t osTimerNew(osTimerFunc_t func, osTimerType_t type, void *argument, c
         timer = static_cast<osRtxTimer_t *>(attr->cb_mem);
         if (timer != nullptr) {
             //lint -e(923) -e(9078) "cast from pointer to unsigned int" [MISRA Note 7]
-            if ((((uint64_t) timer & 3U) != 0U) || (attr->cb_size < sizeof(osRtxTimer_t))) {
+            if (!is_aligned_p(timer) || (attr->cb_size < sizeof(osRtxTimer_t))) {
                 return nullptr;
             }
         } else {

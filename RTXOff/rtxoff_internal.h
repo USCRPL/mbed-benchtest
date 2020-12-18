@@ -7,6 +7,7 @@
 
 #include "cmsis_os.h"
 #include "rtxoff_os.h"
+#include "align.h"
 
 #include <string>
 #include <iostream>

@@ -192,11 +192,9 @@ osMessageQueueId_t osMessageQueueNew(uint32_t msg_count, uint32_t msg_size, cons
         return nullptr;
     }
 
-#if RTXOFF_USE_32BIT
-    block_size = ((msg_size + 3U) & ~3UL) + sizeof(osRtxMessage_t);
-#else
-    block_size = ((msg_size + 7U) & ~7UL) + sizeof(osRtxMessage_t);
-#endif
+    // needs to hold at least a full pointer
+    block_size = align(msg_size) + sizeof(osRtxMessage_t);
+
     if ((__builtin_clz(msg_count) + __builtin_clz(block_size)) < 32U) {
 
         //lint -e{904} "Return statement before end of function" [MISRA Note 1]
@@ -215,7 +213,7 @@ osMessageQueueId_t osMessageQueueNew(uint32_t msg_count, uint32_t msg_size, cons
         mq_size = attr->mq_size;
         if (mq != nullptr) {
             //lint -e(923) -e(9078) "cast from pointer to unsigned int" [MISRA Note 7]
-            if (((reinterpret_cast<uint64_t>(mq) & 3U) != 0U) || (attr->cb_size < sizeof(osRtxMessageQueue_t))) {
+            if (!is_aligned_p(mq) || (attr->cb_size < sizeof(osRtxMessageQueue_t))) {
 
                 //lint -e{904} "Return statement before end of function" [MISRA Note 1]
                 return nullptr;
@@ -229,7 +227,7 @@ osMessageQueueId_t osMessageQueueNew(uint32_t msg_count, uint32_t msg_size, cons
         }
         if (mq_mem != nullptr) {
             //lint -e(923) -e(9078) "cast from pointer to unsigned int" [MISRA Note 7]
-            if (((reinterpret_cast<uint64_t>(mq_mem) & 3U) != 0U) || (mq_size < size)) {
+            if (!is_aligned_p(mq_mem) || (mq_size < size)) {
 
                 //lint -e{904} "Return statement before end of function" [MISRA Note 1]
                 return nullptr;
