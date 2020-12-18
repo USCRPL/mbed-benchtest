@@ -198,47 +198,37 @@ void ThreadDispatcher::dispatchForever()
 			thread.run.next = nullptr;
 		}
 
+		thread.run.curr->state = osRtxThreadRunning;
+
 	}
 }
 
 void ThreadDispatcher::switchNextThread(osRtxThread_t * nextThread)
 {
-	nextThread->state = osRtxThreadRunning;
 	thread.run.next = nextThread;
 }
 
 void ThreadDispatcher::dispatch(osRtxThread_t *toDispatch) {
-    osRtxThread_t *th;
-
-    if (thread.run.next != nullptr &&
-        thread.run.curr->state != osRtxThreadRunning &&
-        thread.run.next->state == osRtxThreadRunning) {
-        // we already had a dispatch that blocked the curr thread and
-        // made thread at next running
-        th = thread.run.next;
-    } else {
-        th = thread.run.curr;
-    }
 
     if (toDispatch == nullptr) {
         osRtxThread_t *thread_ready = thread.ready.thread_list;
 
         if (kernel.state == osRtxKernelRunning &&
             thread_ready != nullptr &&
-            thread_ready->priority > th->priority) {
+            thread_ready->priority > thread.run.curr->priority) {
 #if RTXOFF_DEBUG
             std::cerr << thread_ready->name << " is higher priority than the current (or next) thread " << th->name << ", switching to it now." << std::endl;
 #endif
 			// Preempt running Thread
             osRtxThreadListRemove(thread_ready);
-            osRtxThreadBlock(th);
+            osRtxThreadBlock(thread.run.curr);
             switchNextThread(thread_ready);
         }
     } else {
         if ((kernel.state == osRtxKernelRunning) &&
-            (toDispatch->priority > th->priority)) {
+            (toDispatch->priority > thread.run.curr->priority)) {
             // Preempt running Thread
-            osRtxThreadBlock(th);
+            osRtxThreadBlock(thread.run.curr);
             switchNextThread(toDispatch);
 #if RTXOFF_DEBUG
             std::cerr << toDispatch->name << " is higher priority than the current (or next) thread " << th->name << ", switching to it now." << std::endl;
@@ -258,6 +248,11 @@ void ThreadDispatcher::onTick()
 	if (timer.tick != NULL) {
 		timer.tick();
 	}
+
+	if(thread.run.next != nullptr) {
+        thread.run.curr = thread.run.next;
+        thread.run.next = nullptr;
+    }
 
 	// Process Thread Delays
 	delayListTick();
@@ -436,6 +431,7 @@ void ThreadDispatcher::delayListInsert(osRtxThread_t *toDelay, uint32_t delay) {
     if (delay == osWaitForever) {
         // append to end
         prev = NULL;
+
         next = thread.wait_list;
         while (next != NULL) {
             prev = next;
