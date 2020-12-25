@@ -15,3 +15,7 @@ target_link_libraries(cmsis_rtos_validator rtxoff)
 target_include_directories(cmsis_rtos_validator PRIVATE
 	Include
 	Source/Config)
+
+# add the executable to CTest
+add_test(NAME cmsis_rtos_validator
+	COMMAND $<TARGET_FILE:cmsis_rtos_validator>)

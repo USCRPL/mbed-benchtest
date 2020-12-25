@@ -54,6 +54,9 @@ ThreadDispatcher::ThreadDispatcher()
 
     pthread_mutexattr_destroy(&recursiveAttr);
 
+#ifdef USE_MAC_TIME
+    pthread_cond_init(&kernelModeCondVar, nullptr);
+#else
     // initialize kernel mode cond var
     // make sure that the condition variable is using the monotonic clock
     pthread_condattr_t monotonicClockAttr;
@@ -63,6 +66,7 @@ ThreadDispatcher::ThreadDispatcher()
     pthread_cond_init(&kernelModeCondVar, &monotonicClockAttr);
 
     pthread_condattr_destroy(&monotonicClockAttr);
+#endif
 }
 
 void ThreadDispatcher::lockMutex()
@@ -314,11 +318,7 @@ void ThreadDispatcher::blockUntilWoken() {
     // (and switch to another thread) is yield the processor. For loop there in case
     // of timing weirdness.
     while (currThread->state != osRtxThreadRunning) {
-#if USE_WINTHREAD
-        SwitchToThread();
-#else
-        pthread_yield();
-#endif
+		rtxoff_thread_yield();
     }
 
     lockMutex();

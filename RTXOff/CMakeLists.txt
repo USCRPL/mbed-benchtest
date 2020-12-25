@@ -43,7 +43,7 @@ set(RTX_OFF_SOURCES
 	thread_suspender.cpp
 
 	# program entry point
-	rtxoff_main.cpp thread_suspender.h)
+	rtxoff_main.cpp)
 
 add_library(rtxoff STATIC ${RTX_OFF_SOURCES})
 target_link_libraries(rtxoff)
@@ -70,13 +70,37 @@ if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
 else()
 	target_compile_definitions(rtxoff PUBLIC USE_WINTHREAD=0 _GNU_SOURCE=1)
 
-	# check if the nonstandard pthread_setname_np() function exists
+	# check for a thread yield function
 	set(CMAKE_REQUIRED_LIBRARIES Threads::Threads)
-	check_all_functions(pthread_setname_np)
+	check_all_functions(pthread_yield sched_yield)
 
-	if(HAVE_PTHREAD_SETNAME_NP)
+	if(NOT (HAVE_PTHREAD_YIELD OR HAVE_SCHED_YIELD))
+		message(FATAL_ERROR "Your system does not provide pthread_yield() or sched_yield().  RTXOff cannot build.")
+	endif()
+	if(HAVE_PTHREAD_YIELD)
+		target_compile_definitions(rtxoff PRIVATE HAVE_PTHREAD_YIELD)
+	endif()
+
+	# Check for a linux API pthread_setname_np (as opposed to the Mac version that works differently).
+	# The situation is summarized here: https://stackoverflow.com/questions/2369738/how-to-set-the-name-of-a-thread-in-linux-pthreads/7989973#7989973
+	include(CheckCSourceCompiles)
+	check_c_source_compiles(
+		"#include <pthread.h>
+		int main(int argc, char** argv)
+		{
+		    pthread_setname_np(pthread_self(), \"TestThread\");
+		}"
+		PTHREAD_SETNAME_NP_WORKS)
+
+	if(PTHREAD_SETNAME_NP_WORKS)
 		target_compile_definitions(rtxoff PRIVATE HAVE_PTHREAD_SETNAME_NP)
 	endif()
+
+	# tell code to use more limited timing functions available on OS X
+	if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+		target_compile_definitions(rtxoff PRIVATE USE_MAC_TIME)
+	endif()
+
 endif()
 
 # manually apply mbed configs

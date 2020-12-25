@@ -149,7 +149,7 @@ void Th_MsgWait (void const *arg) {
     
     if (p && evt.status == osEventMessage) {
       /* Return counter value */
-      *p = (uint32_t)evt.value.p;
+      *p = evt.value.v;
       return;
     }
   }

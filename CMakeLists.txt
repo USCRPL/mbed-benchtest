@@ -56,6 +56,16 @@ set(CMAKE_C_STANDARD 99)
 
 find_package(Threads REQUIRED)
 
+# setup testing
+# -------------------------------------------------------------
+enable_testing()
+
+# target to run tests
+# (note: "make test" is reserved, so use "make run_tests" instead)
+add_custom_target(run_tests
+	COMMAND ${CMAKE_CTEST_COMMAND} -j 2 --timeout 30 -V ${CMAKE_BINARY_DIR}
+	COMMENT "Running mbed-benchtest tests")
+
 # recurse to subdirectories
 # -------------------------------------------------------------
 

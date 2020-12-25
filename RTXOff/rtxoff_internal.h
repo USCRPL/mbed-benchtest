@@ -23,6 +23,18 @@
 #define __builtin_clz(x) __lzcnt(x)
 #endif
 
+// handle thread yield function
+#if USE_WINTHREAD
+#define rtxoff_thread_yield() SwitchToThread()
+#else
+#ifdef HAVE_PTHREAD_YIELD
+#define rtxoff_thread_yield() pthread_yield()
+#else
+#include <sched.h>
+#define rtxoff_thread_yield() sched_yield()
+#endif
+#endif
+
 // RTXOff Debugging (to cerr, so that it is in correct order)
 #ifndef RTXOFF_DEBUG
 #define RTXOFF_DEBUG 1
