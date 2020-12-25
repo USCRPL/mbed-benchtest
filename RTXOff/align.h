@@ -7,7 +7,7 @@
 
 #if RTXOFF_USE_32BIT
 template <typename T>
-constexpr uint32_t align(T x) {
+constexpr T align(T x) {
     return (x + 3U) & ~3UL;
 }
 
@@ -22,7 +22,7 @@ constexpr bool is_aligned(T x) {
 #else
 
 template<typename T>
-constexpr inline uint64_t align(T x) {
+constexpr inline T align(T x) {
 return (x + 7U) & ~7UL;
 }
 
