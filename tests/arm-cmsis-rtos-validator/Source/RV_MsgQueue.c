@@ -50,9 +50,9 @@ osEvent      MsgQEv_Isr;
 #define MSG_THREAD_TO_ISR_PERIOD     2  /* Interrupt period in miliseconds    */
 // [ILG]
 #if defined(DEBUG)
-#define MSG_THREAD_TO_ISR_TIMEOUT 500  /* Timeout in ms ->  1sec @ 2ms       */
+#define MSG_THREAD_TO_ISR_TIMEOUT 50  /* Timeout in ms ->  .1sec @ 2ms       */
 #else
-#define MSG_THREAD_TO_ISR_TIMEOUT 2500  /* Timeout in ms ->  5sec @ 2ms       */
+#define MSG_THREAD_TO_ISR_TIMEOUT 250  /* Timeout in ms ->  .5sec @ 2ms       */
 #endif
 
 static void Isr_MsgReceive (void);
@@ -62,9 +62,9 @@ static void Isr_MsgReceive (void);
 #define MSG_ISR_TO_THREAD_PERIOD     2  /* Interrupt period in miliseconds    */
 // [ILG]
 #if defined(DEBUG)
-#define MSG_ISR_TO_THREAD_TIMEOUT 500  /* Timeout in ms ->  1sec @ 2ms       */
+#define MSG_ISR_TO_THREAD_TIMEOUT 50  /* Timeout in ms ->  .1sec @ 2ms       */
 #else
-#define MSG_ISR_TO_THREAD_TIMEOUT 2500  /* Timeout in ms ->  5sec @ 2ms       */
+#define MSG_ISR_TO_THREAD_TIMEOUT 250  /* Timeout in ms ->  .5sec @ 2ms       */
 #endif
 
 static void Isr_MsgSend (void);
