@@ -3,6 +3,8 @@
 //
 
 #include <cstring>
+#include <limits>
+
 #include "ThreadDispatcher.h"
 
 //  ==== Helper functions ====
@@ -195,7 +197,7 @@ osMessageQueueId_t osMessageQueueNew(uint32_t msg_count, uint32_t msg_size, cons
     // needs to hold at least a full pointer
     block_size = align(msg_size) + sizeof(osRtxMessage_t);
 
-    if ((__builtin_clz(msg_count) + __builtin_clz(block_size)) < 32U) {
+    if (static_cast<uint64_t>(msg_count) * static_cast<uint64_t>(block_size) >= std::numeric_limits<int32_t>::max()) {
 
         //lint -e{904} "Return statement before end of function" [MISRA Note 1]
         return nullptr;

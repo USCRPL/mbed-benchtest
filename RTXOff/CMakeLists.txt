@@ -103,5 +103,17 @@ else()
 
 endif()
 
+# detect 32 vs 64 bit
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+	add_compile_definitions(RTXOFF_USE_32BIT=0)
+elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+	add_compile_definitions(RTXOFF_USE_32BIT=1)
+else()
+	message(FATAL_ERROR "RTXOff requires a 32 or 64 bit machine")
+endif()
+
+add_compile_definitions(RTXOFF_DEBUG=${RTXOFF_DEBUG})
+add_compile_definitions(RTXOFF_VERBOSE=${RTXOFF_VERBOSE})
+
 # manually apply mbed configs
 target_compile_definitions(rtxoff PUBLIC MBED_CONF_RTOS_PRESENT=1)

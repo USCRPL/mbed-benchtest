@@ -333,8 +333,8 @@ bool ThreadDispatcher::updateTick()
 	if(timeDelta >= tickDuration)
 	{
 		// note: duration_cast always rounds down.
-		kernel.tickDelta = duration_cast<milliseconds>(timeDelta).count();
-		kernel.tick += duration_cast<milliseconds>(timeDelta).count();
+		kernel.tickDelta = static_cast<uint32_t>(duration_cast<milliseconds>(timeDelta).count());
+		kernel.tick += static_cast<uint32_t>(duration_cast<milliseconds>(timeDelta).count());
 		lastTickTime += duration_cast<milliseconds>(timeDelta);
 		return true;
 	}
@@ -418,7 +418,7 @@ void ThreadDispatcher::processQueuedISRData()
 	dispatch(nullptr);
 }
 
-void ThreadDispatcher::delayListInsert(osRtxThread_t *toDelay, uint32_t delay) {
+void ThreadDispatcher::delayListInsert(osRtxThread_t *toDelay, int64_t delay) {
 
 #if RTXOFF_DEBUG && RTXOFF_VERBOSE
     std::cerr << "Inserting thread " << toDelay->name << " (" << toDelay << ",prev="

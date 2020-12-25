@@ -276,7 +276,7 @@ public:
 	/// Insert a Thread into the Delay list sorted by Delay (Lowest at Head).
 	/// \param[in]  thread          thread object.
 	/// \param[in]  delay           delay value.
-	void delayListInsert(osRtxThread_t * toDelay, uint32_t delay);
+	void delayListInsert(osRtxThread_t * toDelay, int64_t delay);
 
 	/// Remove a Thread from the Delay list.
 	/// \param[in]  thread          thread object.

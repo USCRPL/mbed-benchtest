@@ -11,9 +11,8 @@ constexpr uint32_t align(T x) {
     return (x + 3U) & ~3UL;
 }
 
-template<void *>
-constexpr bool is_aligned(void *x) {
-    return (reinterpret_cast<uint64_t>(x) & 3U) == 0;
+static inline bool is_aligned_p(void *x) {
+    return (reinterpret_cast<ptrdiff_t>(x) & 3U) == 0;
 }
 
 template<typename T>
@@ -28,7 +27,7 @@ return (x + 7U) & ~7UL;
 }
 
 static inline bool is_aligned_p(void *x) {
-    return (reinterpret_cast<uint64_t>(x) & 7U) == 0;
+    return (reinterpret_cast<ptrdiff_t>(x) & 7U) == 0;
 }
 
 template<typename T>

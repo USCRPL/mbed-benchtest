@@ -3,6 +3,7 @@
 //
 
 #include <cstring>
+#include <limits>
 #include "ThreadDispatcher.h"
 
 
@@ -151,7 +152,7 @@ static osMemoryPoolId_t svcRtxMemoryPoolNew(uint32_t block_count, uint32_t block
     }
     b_count = block_count;
     b_size = align(block_size);
-    if ((__builtin_clz(b_count) + __builtin_clz(b_size)) < 32U) {
+    if (static_cast<uint64_t>(b_count) * static_cast<uint64_t>(b_size) >= std::numeric_limits<int32_t>::max()) {
         // add event
         // EvrRtxMemoryPoolError(nullptr, (int32_t) osErrorParameter);
         //lint -e{904} "Return statement before end of function" [MISRA Note 1]

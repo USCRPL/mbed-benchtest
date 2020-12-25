@@ -174,7 +174,7 @@ typedef struct osRtxTimer_s {
   const char                    *name;  ///< Object Name
   struct osRtxTimer_s           *prev;  ///< Pointer to previous active Timer
   struct osRtxTimer_s           *next;  ///< Pointer to next active Timer
-  uint32_t                       tick;  ///< Timer current Tick
+  uint32_t                       tick;  ///< Timer current Tick.  Delta from previous timer in the timer list.
   uint32_t                       load;  ///< Timer Load value
   osRtxTimerFinfo_t             finfo;  ///< Timer Function Info
 } osRtxTimer_t;

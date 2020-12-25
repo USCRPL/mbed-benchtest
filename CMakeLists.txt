@@ -9,10 +9,6 @@ project(mbed-benchtest LANGUAGES C CXX)
 include(cmake/Shorthand.cmake)
 include(CheckFunctionExists)
 
-if (NOT DEFINED RTXOFF_USE_32BIT)
-	set(RTXOFF_USE_32BIT 0)
-endif ()
-
 if (NOT DEFINED RTXOFF_DEBUG)
 	set(RTXOFF_DEBUG 0)
 endif ()
@@ -20,10 +16,6 @@ endif ()
 if (NOT DEFINED RTXOFF_VERBOSE)
 	set(RTXOFF_VERBOSE 0)
 endif ()
-
-add_compile_definitions(RTXOFF_USE_32BIT=${RTXOFF_USE_32BIT})
-add_compile_definitions(RTXOFF_DEBUG=${RTXOFF_DEBUG})
-add_compile_definitions(RTXOFF_VERBOSE=${RTXOFF_VERBOSE})
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 
@@ -41,14 +33,12 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 
 	# disable verbose security warnings
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS=1)
+
+	# disable standard library max() and min() macros that break things
+	add_definitions(-DNOMINMAX)
 else()
 	# gcc, clang, etc.
 	add_compile_options(-Wall)
-
-	if (RTXOFF_USE_32BIT)
-		add_definitions("-m32")
-		SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -m32")
-	endif ()
 endif()
 
 set(CMAKE_CXX_STANDARD 14)
