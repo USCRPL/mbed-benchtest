@@ -76,8 +76,8 @@ static void osRtxTimerTick(void) {
         return;
     }
 
-    timer->tick--;
-    while ((timer != nullptr) && (timer->tick == 0U)) {
+    timer->tick -= 1;ThreadDispatcher::instance().kernel.tickDelta;
+    while ((timer != nullptr) && (timer->tick <= 0U)) {
         TimerUnlink(timer);
         status = osMessageQueuePut(ThreadDispatcher::instance().timer.mq, &timer->finfo, 0U, 0U);
         if (status != osOK) {
@@ -87,6 +87,13 @@ static void osRtxTimerTick(void) {
             // TODO throw or something
             //(void) osRtxErrorNotify(osRtxErrorTimerQueueOverflow, timer);
         }
+
+		// proxy a negative delay value onto the next timer
+		if(ThreadDispatcher::instance().timer.list != nullptr)
+		{
+			ThreadDispatcher::instance().timer.list->tick += timer->tick;
+		}
+
         if (timer->type == osRtxTimerPeriodic) {
             TimerInsert(timer, timer->load);
         } else {
