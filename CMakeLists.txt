@@ -12,21 +12,18 @@ include(CheckFunctionExists)
 if (NOT DEFINED RTXOFF_USE_32BIT)
 	set(RTXOFF_USE_32BIT 0)
 endif ()
-add_compile_definitions(RTXOFF_USE_32BIT=${RTXOFF_USE_32BIT})
 
 if (NOT DEFINED RTXOFF_DEBUG)
-	if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
-		set(RTXOFF_DEBUG 0)
-	else ()
-		set(RTXOFF_DEBUG 1)
-	endif ()
+	set(RTXOFF_DEBUG 0)
 endif ()
 
 if (NOT DEFINED RTXOFF_VERBOSE)
 	set(RTXOFF_VERBOSE 0)
 endif ()
 
+add_compile_definitions(RTXOFF_USE_32BIT=${RTXOFF_USE_32BIT})
 add_compile_definitions(RTXOFF_DEBUG=${RTXOFF_DEBUG})
+add_compile_definitions(RTXOFF_VERBOSE=${RTXOFF_VERBOSE})
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 
