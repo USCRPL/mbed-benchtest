@@ -109,7 +109,23 @@ osStatus_t osKernelStart (void)
 			0U,
 			0U
 	};
+
+	// Create Timer Thread
+	static const osThreadAttr_t os_timer_thread_attr = {
+			"rtxoff_timer",
+			osThreadDetached,
+			nullptr,
+			0,
+			nullptr,
+			0,
+            static_cast<osPriority_t>(OS_TIMER_THREAD_PRIO),
+            OS_TIMER_THREAD_TZ_MOD_ID,
+			0U
+	};
+
 	ThreadDispatcher::instance().thread.idle = reinterpret_cast<osRtxThread_t *>(osThreadNew(osRtxIdleThread, NULL, &os_idle_thread_attr));
+
+    ThreadDispatcher::instance().thread.timer = reinterpret_cast<osRtxThread_t *>(osThreadNew(osRtxTimerThread, NULL, &os_timer_thread_attr));
 
 	// Switch to Ready Thread with highest Priority
 	thread = osRtxThreadListGet(&ThreadDispatcher::instance().thread.ready);
@@ -135,7 +151,7 @@ uint32_t osKernelGetTickFreq (void) {
 /// Get the RTOS kernel system timer count.
 /// This should be finer grain than the tick count.
 uint32_t osKernelGetSysTimerCount (void) {
-	return RTXClock::now().time_since_epoch().count();
+	return static_cast<uint32_t>(RTXClock::now().time_since_epoch().count());
 }
 
 /// Get the RTOS kernel system timer frequency.

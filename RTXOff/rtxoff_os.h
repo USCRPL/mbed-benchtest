@@ -95,14 +95,14 @@ extern "C"
 #define osRtxThreadWaitingMemoryPool    ((uint8_t)(osRtxThreadBlocked | 0x70U))
 #define osRtxThreadWaitingMessageGet    ((uint8_t)(osRtxThreadBlocked | 0x80U))
 #define osRtxThreadWaitingMessagePut    ((uint8_t)(osRtxThreadBlocked | 0x90U))
- 
+
 /// Thread Flags definitions
 #define osRtxThreadFlagDefStack 0x10U   ///< Default Stack flag
- 
+
 /// Stack Marker definitions
 #define osRtxStackMagicWord     0xE25A2EA5U ///< Stack Magic Word (Stack Base)
 #define osRtxStackFillPattern   0xCCCCCCCCU ///< Stack Fill Pattern 
- 
+
 /// Thread Control Block
 typedef struct osRtxThread_s {
   uint8_t                          id;  ///< Object Identifier
@@ -127,8 +127,20 @@ typedef struct osRtxThread_s {
   uint64_t waitExitVal;                 // return value passed from osRtxThreadWaitExit().  Set only when this function is called, not when a thread wait timeout expires.
   uint8_t waitValPresent;               // Whether above value is present.
 
-  os_thread_id osThread;
-  struct thread_suspender_data * suspenderData;
+    // when a queue is blocked on a get or put, it will store its information here
+    struct {
+        union {
+            void *receive;
+            const void *send;
+        } msg_body;
+        union {
+          uint8_t *receive;
+          uint8_t send;
+        } msg_prio;
+    } queueBlockedData;
+
+    os_thread_id osThread;
+    struct thread_suspender_data *suspenderData;
 
   // start data
   osThreadFunc_t start_func;
@@ -162,7 +174,7 @@ typedef struct osRtxTimer_s {
   const char                    *name;  ///< Object Name
   struct osRtxTimer_s           *prev;  ///< Pointer to previous active Timer
   struct osRtxTimer_s           *next;  ///< Pointer to next active Timer
-  uint32_t                       tick;  ///< Timer current Tick
+  uint32_t                       tick;  ///< Timer current Tick.  Delta from previous timer in the timer list.
   uint32_t                       load;  ///< Timer Load value
   osRtxTimerFinfo_t             finfo;  ///< Timer Function Info
 } osRtxTimer_t;
@@ -240,7 +252,7 @@ typedef struct {
  
  
 //  ==== Message Queue definitions ====
- 
+
 /// Message Control Block
 typedef struct osRtxMessage_s {
   uint8_t                          id;  ///< Object Identifier
@@ -312,16 +324,21 @@ typedef struct {
 /// \param         block_size    memory block size in bytes.
 #define osRtxMemoryPoolMemSize(block_count, block_size) \
   (4*(block_count)*(((block_size)+3)/4))
- 
+
 /// Memory size in bytes for Message Queue storage.
 /// \param         msg_count     maximum number of messages in queue.
 /// \param         msg_size      maximum message size in bytes.
+#if RTXOFF_USE_32BIT
 #define osRtxMessageQueueMemSize(msg_count, msg_size) \
-  (4*(msg_count)*(3+(((msg_size)+3)/4)))
- 
- 
+  (4*(msg_count)*(sizeof(osRtxMessage_t)/4+(((msg_size)+3)/4)))
+#else
+#define osRtxMessageQueueMemSize(msg_count, msg_size) \
+  (4*(msg_count)*(sizeof(osRtxMessage_t)/4+(((msg_size+7U)&~7UL)/4)))
+#endif
+
+
 //  ==== OS External Functions ====
- 
+
 // OS Error Codes
 #define osRtxErrorStackUnderflow        1U  ///< Stack overflow, i.e. stack pointer below its lower memory limit for descending stacks.
 #define osRtxErrorISRQueueOverflow      2U  ///< ISR Queue overflow detected when inserting object.

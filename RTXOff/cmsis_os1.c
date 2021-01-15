@@ -103,7 +103,7 @@ os_InRegs osEvent osSignalWait (int32_t signals, uint32_t millisec) {
 
 #endif  // Signal
 
-/*
+
 // Timer
 #if !defined(os1_Disable_Timer)
 osTimerId osTimerCreate (const osTimerDef_t *timer_def, os_timer_type type, void *argument) {
@@ -114,7 +114,7 @@ osTimerId osTimerCreate (const osTimerDef_t *timer_def, os_timer_type type, void
   return osTimerNew((osTimerFunc_t)timer_def->ptimer, type, argument, &timer_def->attr);
 }
 #endif
-*/
+
 
 // Mutex
 #if !defined(os1_Disable_Mutex)
@@ -197,7 +197,7 @@ osStatus osPoolFree (osPoolId pool_id, void *block) {
 
 #endif  // Memory Pool
 
-/*
+
 
 // Message Queue
 
@@ -242,7 +242,7 @@ os_InRegs osEvent osMessageGet (osMessageQId queue_id, uint32_t millisec) {
 
 #endif  // Message Queue
 
-
+/*
 // Mail Queue
 
 #if (defined(osFeature_MailQ) && (osFeature_MailQ != 0)) && !defined(os1_Disable_MailQ)

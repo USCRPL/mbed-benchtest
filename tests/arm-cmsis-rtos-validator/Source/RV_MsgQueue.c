@@ -35,7 +35,7 @@ osTimerDef (MsgQ_PeriodicTimer, MsgQ_TimerCallback);
 
 /* Definitions for TC_MsgQWait */
 void Th_MsgWait (void const *arg);
-osThreadDef (Th_MsgWait, osPriorityAboveNormal, 1, 0);
+osThreadDef (Th_MsgWait, osPriorityAboveNormal, 1);
 
 uint8_t MsgWaitCnt;
 
@@ -50,9 +50,9 @@ osEvent      MsgQEv_Isr;
 #define MSG_THREAD_TO_ISR_PERIOD     2  /* Interrupt period in miliseconds    */
 // [ILG]
 #if defined(DEBUG)
-#define MSG_THREAD_TO_ISR_TIMEOUT 500  /* Timeout in ms ->  1sec @ 2ms       */
+#define MSG_THREAD_TO_ISR_TIMEOUT 50  /* Timeout in ms ->  .1sec @ 2ms       */
 #else
-#define MSG_THREAD_TO_ISR_TIMEOUT 2500  /* Timeout in ms ->  5sec @ 2ms       */
+#define MSG_THREAD_TO_ISR_TIMEOUT 250  /* Timeout in ms ->  .5sec @ 2ms       */
 #endif
 
 static void Isr_MsgReceive (void);
@@ -62,9 +62,9 @@ static void Isr_MsgReceive (void);
 #define MSG_ISR_TO_THREAD_PERIOD     2  /* Interrupt period in miliseconds    */
 // [ILG]
 #if defined(DEBUG)
-#define MSG_ISR_TO_THREAD_TIMEOUT 500  /* Timeout in ms ->  1sec @ 2ms       */
+#define MSG_ISR_TO_THREAD_TIMEOUT 50  /* Timeout in ms ->  .1sec @ 2ms       */
 #else
-#define MSG_ISR_TO_THREAD_TIMEOUT 2500  /* Timeout in ms ->  5sec @ 2ms       */
+#define MSG_ISR_TO_THREAD_TIMEOUT 250  /* Timeout in ms ->  .5sec @ 2ms       */
 #endif
 
 static void Isr_MsgSend (void);
@@ -128,7 +128,7 @@ void MsgQ_TimerCallback (void const *arg) {
 void CreateMessageQueue (void) {
   /* Create a memory pool */
   MsgQ_Id = osMessageCreate (osMessageQ (MsgQ), NULL);
-  ASSERT_TRUE (MsgQ_Id != NULL);
+  ASSERT_TRUE (MsgQ_Id != NULL); //TODO for some reason this assert doesn't pass
 }
 
 /*-----------------------------------------------------------------------------
@@ -149,7 +149,7 @@ void Th_MsgWait (void const *arg) {
     
     if (p && evt.status == osEventMessage) {
       /* Return counter value */
-      *p = (uint32_t)evt.value.p;
+      *p = evt.value.v;
       return;
     }
   }

@@ -1,0 +1,48 @@
+name: Run Tests
+
+on: pull_request
+
+jobs:
+    build_test_linux:
+        name: Build and test on Linux
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Check out repo
+                uses: actions/checkout@v2
+            
+            -   name: Compile
+                run: bash -ex .github/workflows/compile-mbed-benchtest.sh
+        
+            -   name: Run Tests
+                run: bash -ex .github/workflows/run-tests.sh
+                
+    build_test_mac:
+        name: Build and test on Mac
+        runs-on: macos-latest
+        steps:
+            -   name: Check out repo
+                uses: actions/checkout@v2
+            
+            -   name: Compile
+                run: bash -ex .github/workflows/compile-mbed-benchtest.sh
+        
+            -   name: Run Tests
+                run: bash -ex .github/workflows/run-tests.sh
+                
+    build_test_msvc:
+        name: Build and test on Windows MSVC
+        runs-on: windows-latest
+        steps:
+            -   name: Check out repo
+                uses: actions/checkout@v2
+                
+            -   name: Add msbuild to PATH
+                uses: microsoft/setup-msbuild@v1.0.2
+            
+            -   name: Compile
+                run: call .github/workflows/compile-mbed-benchtest.bat
+                shell: cmd
+        
+            -   name: Run Tests
+                run: call .github/workflows/run-tests.bat
+                shell: cmd

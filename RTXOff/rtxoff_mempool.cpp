@@ -3,6 +3,7 @@
 //
 
 #include <cstring>
+#include <limits>
 #include "ThreadDispatcher.h"
 
 
@@ -128,7 +129,6 @@ static void osRtxMemoryPoolPostProcess(osRtxMemoryPool_t *mp) {
     }
 }
 
-
 //  ==== Service Calls ====
 
 /// Create and Initialize a Memory Pool object.
@@ -151,8 +151,8 @@ static osMemoryPoolId_t svcRtxMemoryPoolNew(uint32_t block_count, uint32_t block
         return nullptr;
     }
     b_count = block_count;
-    b_size = (block_size + 3U) & ~3UL;
-    if ((__builtin_clz(b_count) + __builtin_clz(b_size)) < 32U) {
+    b_size = align(block_size);
+    if (static_cast<uint64_t>(b_count) * static_cast<uint64_t>(b_size) >= std::numeric_limits<int32_t>::max()) {
         // add event
         // EvrRtxMemoryPoolError(nullptr, (int32_t) osErrorParameter);
         //lint -e{904} "Return statement before end of function" [MISRA Note 1]
@@ -171,7 +171,7 @@ static osMemoryPoolId_t svcRtxMemoryPoolNew(uint32_t block_count, uint32_t block
         mp_size = attr->mp_size;
         if (mp != nullptr) {
             //lint -e(923) -e(9078) "cast from pointer to unsigned int" [MISRA Note 7]
-            if ((((uint64_t) mp & 3U) != 0U) || (attr->cb_size < sizeof(osRtxMemoryPool_t))) {
+            if (!is_aligned_p(mp) || (attr->cb_size < sizeof(osRtxMemoryPool_t))) {
                 // add event
                 // EvrRtxMemoryPoolError(nullptr, osRtxErrorInvalidControlBlock);
                 //lint -e{904} "Return statement before end of function" [MISRA Note 1]
@@ -187,7 +187,7 @@ static osMemoryPoolId_t svcRtxMemoryPoolNew(uint32_t block_count, uint32_t block
         }
         if (mp_mem != nullptr) {
             //lint -e(923) -e(9078) "cast from pointer to unsigned int" [MISRA Note 7]
-            if ((((uint64_t) mp_mem & 3U) != 0U) || (mp_size < size)) {
+            if (!is_aligned_p(mp_mem) || (mp_size < size)) {
                 // add event
                 // EvrRtxMemoryPoolError(nullptr, osRtxErrorInvalidDataMemory);
                 //lint -e{904} "Return statement before end of function" [MISRA Note 1]

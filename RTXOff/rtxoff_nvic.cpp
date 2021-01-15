@@ -35,11 +35,7 @@ void deliverNewInterrupt(InterruptData & interrupt, std::unique_lock<std::recurs
 
 			// request the scheduler to run
 			ThreadDispatcher::instance().requestSchedule();
-#if USE_WINTHREAD
-			SwitchToThread();
-#else
-            pthread_yield();
-#endif
+			rtxoff_thread_yield();
 		}
 
 		interruptDataLock.lock();

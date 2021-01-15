@@ -29,7 +29,7 @@ typedef HANDLE os_thread_id;
 
 struct thread_suspender_data
 {
-    // empty
+    char dummy; // dummy data, struct must have at least one member
 };
 
 #else

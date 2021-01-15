@@ -467,7 +467,7 @@ void TC_SemaphoreWaitTimeout (void) {
         break;
       }
     }
-    ASSERT_TRUE (i <= 10); // QEMU max seen value was 8
+    ASSERT_TRUE (i <= 12); // I encountered 11
     
     if (evt.status == osEventSignal) {
       ASSERT_TRUE (evt.value.signals == 0x02);

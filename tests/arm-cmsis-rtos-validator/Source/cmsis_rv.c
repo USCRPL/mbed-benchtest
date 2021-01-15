@@ -111,8 +111,8 @@ static TEST_CASE TC_LIST[] = {
   TCD ( TC_MsgQWait,                             1      ),  
   TCD ( TC_MsgQParam,                            1      ),  
   TCD ( TC_MsgQInterrupts,                       1      ),  
-  TCD ( TC_MsgFromThreadToISR,                   1      ),  
-  TCD ( TC_MsgFromISRToThread,                   1      ),  
+  TCD ( TC_MsgFromThreadToISR,                   1      ),
+  TCD ( TC_MsgFromISRToThread,                   1      ),
 #endif 
 #ifdef RTE_RV_MAILQUEUE
   TCD ( TC_MailAlloc,                            1      ),
